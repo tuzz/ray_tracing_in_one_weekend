@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "vector3f.c"
 
 int main(void) {
   int image_width = 256;
