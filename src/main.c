@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
 #include "vec3.c"
 #include "point3.c"
 #include "color3.c"
