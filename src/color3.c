@@ -1,6 +1,6 @@
-typedef Vector3f Color3f;
+typedef Vec3 Color3;
 
-static void color3f_write_line(Vector3f self, FILE *stream) {
+static void color3_write_line(Vec3 self, FILE *stream) {
   int red = (int)(255.999f * self.x);
   int green = (int)(255.999f * self.y);
   int blue = (int)(255.999f * self.z);
