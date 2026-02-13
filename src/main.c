@@ -19,34 +19,30 @@ int main(void) {
 
   Vector3f viewport_u = { .x = viewport_width };
   Vector3f viewport_v = { .y = -viewport_height };
-  Vector3f viewport_half_u = vector3f_scale(&viewport_u, 0.5f);
-  Vector3f viewport_half_v = vector3f_scale(&viewport_v, 0.5f);
 
-  Vector3f pixel_delta_u = vector3f_scale(&viewport_u, 1.0f / image_width);
-  Vector3f pixel_delta_v = vector3f_scale(&viewport_v, 1.0f / image_height);
-  Vector3f pixel_delta_uv = vector3f_add(&pixel_delta_u, &pixel_delta_v);
-  Vector3f pixel_delta_half_uv = vector3f_scale(&pixel_delta_uv, 0.5f);
+  Vector3f pixel_delta_u = vector3f_scale(viewport_u, 1.0f / image_width);
+  Vector3f pixel_delta_v = vector3f_scale(viewport_v, 1.0f / image_height);
 
-  Point3f viewport_mid_mid = vector3f_subtract(&camera_center, &(Vector3f){ .z = focal_length });
-  Point3f viewport_mid_left = vector3f_subtract(&viewport_mid_mid, &viewport_half_u);
-  Point3f viewport_top_left = vector3f_subtract(&viewport_mid_left, &viewport_half_v);
-  Point3f pixel00_loc = vector3f_add(&viewport_top_left, &pixel_delta_half_uv);
+  Point3f viewport_mid_mid = vector3f_subtract(camera_center, (Vector3f){ .z = focal_length });
+  Point3f viewport_mid_left = vector3f_subtract(viewport_mid_mid, vector3f_scale(viewport_u, 0.5f));
+  Point3f viewport_top_left = vector3f_subtract(viewport_mid_left, vector3f_scale(viewport_v, 0.5f));
+  Point3f pixel00_loc = vector3f_add(viewport_top_left, vector3f_scale(vector3f_add(pixel_delta_u, pixel_delta_v), 0.5f));
 
   printf("P3\n%d %d\n255\n", image_width, image_height);
 
   for (int j = 0; j < image_height; j++) {
     fprintf(stderr, "\rScanlines remaining: %d ", (image_height - j));
     for (int i = 0; i < image_width; i++) {
-      Vector3f pixel_x_offset = vector3f_scale(&pixel_delta_u, i);
-      Vector3f pixel_y_offset = vector3f_scale(&pixel_delta_v, j);
-      Point3f pixel_center = vector3f_add(&pixel00_loc, &pixel_x_offset);
-      pixel_center = vector3f_add(&pixel_center, &pixel_y_offset);
+      Vector3f pixel_x_offset = vector3f_scale(pixel_delta_u, i);
+      Vector3f pixel_y_offset = vector3f_scale(pixel_delta_v, j);
+      Point3f pixel_center = vector3f_add(pixel00_loc, pixel_x_offset);
+      pixel_center = vector3f_add(pixel_center, pixel_y_offset);
 
-      Vector3f ray_direction = vector3f_subtract(&pixel_center, &camera_center);
+      Vector3f ray_direction = vector3f_subtract(pixel_center, camera_center);
       Ray3f r = { .origin = camera_center, .direction = ray_direction };
 
-      Color3f pixel_color = ray3f_color(&r);
-      color3f_write_line(&pixel_color, stdout);
+      Color3f pixel_color = ray3f_color(r);
+      color3f_write_line(pixel_color, stdout);
     }
   }
 
