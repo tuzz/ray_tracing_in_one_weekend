@@ -8,5 +8,11 @@ static Point3 ray3_at(Ray3 self, float t) {
 }
 
 static Color3 ray3_color(Ray3 self) {
-  return (Color3){ 0.0f, 0.0f, 0.0f };
+  Vec3 unit_direction = vec3_unit(self.direction);
+  float alpha = 0.5f * (unit_direction.y + 1.0f);
+
+  Color3 white = { 1.0f, 1.0f, 1.0f };
+  Color3 sky_blue = { 0.5f, 0.7f, 1.0f };
+
+  return vec3_lerp(white, sky_blue, alpha);
 }

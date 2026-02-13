@@ -68,6 +68,10 @@ static Vec3 vec3_unit(Vec3 self) {
   return vec3_scale(self, 1.0f / vec3_length(self));
 }
 
+static Vec3 vec3_lerp(Vec3 self, Vec3 other, float alpha) {
+  return vec3_add(vec3_scale(self, 1.0f - alpha), vec3_scale(other, alpha));
+}
+
 static void vec3_write(Vec3 self, FILE *stream) {
   fprintf(stream, "%f %f %f", (double)self.x, (double)self.y, (double)self.z);
 }
