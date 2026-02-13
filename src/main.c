@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <math.h>
 #include "vector3f.c"
+#include "point3f.c"
+#include "color3f.c"
 
 int main(void) {
   int image_width = 256;
@@ -10,15 +13,8 @@ int main(void) {
   for (int j = 0; j < image_height; j++) {
     fprintf(stderr, "\rScanlines remaining: %d ", (image_height - j));
     for (int i = 0; i < image_width; i++) {
-      double r = (double)i / (image_width - 1);
-      double g = (double)j / (image_height - 1);
-      double b = 0.0;
-
-      int ir = (int)(255.999 * r);
-      int ig = (int)(255.999 * g);
-      int ib = (int)(255.999 * b);
-
-      printf("%d %d %d\n", ir, ig, ib);
+      Vector3f pixel_color = { (float)i / (image_width - 1), (float)j / (image_height - 1), 0 };
+      color3f_write_line(&pixel_color, stdout);
     }
   }
 

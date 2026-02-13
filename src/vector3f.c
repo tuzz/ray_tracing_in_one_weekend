@@ -1,5 +1,3 @@
-#include <math.h>
-
 typedef struct {
   float x;
   float y;
@@ -70,6 +68,6 @@ static Vector3f vector3f_unit(const Vector3f *self) {
   return vector3f_scale(self, 1.0f / vector3f_length(self));
 }
 
-static void vector3f_print(const Vector3f *self, FILE *stream) {
+static void vector3f_write(const Vector3f *self, FILE *stream) {
   fprintf(stream, "%f %f %f", (double)self->x, (double)self->y, (double)self->z);
 }
