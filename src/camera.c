@@ -56,7 +56,7 @@ static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, int depth, cons
 
   Hit hit;
   if (hittable_hit(world, ray, (Interval){0.001f, INFINITY}, &hit)) {
-    Vec3 direction = vec3_random_on_hemisphere(hit.normal);
+    Vec3 direction = vec3_add(hit.normal, vec3_random_unit());
     Ray3 new_ray = {.origin = hit.p, .direction = direction};
     return vec3_scale(camera_ray_color(c, &new_ray, depth - 1, world), 0.5f);
   }
