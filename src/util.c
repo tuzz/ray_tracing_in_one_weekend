@@ -8,6 +8,6 @@ static float random_float(void) {
   return rand() / (float)RAND_MAX;
 }
 
-static float random_float_between(float min, float max) {
+static float random_between(float min, float max) {
   return min + (max - min) * random_float();
 }

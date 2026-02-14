@@ -54,7 +54,9 @@ static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, const Hittable 
   Hit hit;
 
   if (hittable_hit(world, ray, (Interval){0.0f, INFINITY}, &hit)) {
-    return vec3_scale(vec3_add(hit.normal, (Vec3){1.0f, 1.0f, 1.0f}), 0.5f);
+    Vec3 direction = vec3_random_on_hemisphere(hit.normal);
+    Ray3 new_ray = {.origin = hit.p, .direction = direction};
+    return vec3_scale(camera_ray_color(c, &new_ray, world), 0.5f);
   }
 
   Vec3 unit_direction = vec3_unit(ray->direction);

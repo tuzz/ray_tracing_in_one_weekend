@@ -42,8 +42,35 @@ static float vec3_length(Vec3 v) {
   return sqrtf(vec3_length_squared(v));
 }
 
+static Vec3 vec3_random(void) {
+  return (Vec3){random_float(), random_float(), random_float()};
+}
+
+static Vec3 vec3_random_between(float min, float max) {
+  return (Vec3){random_between(min, max), random_between(min, max), random_between(min, max)};
+}
+
 static Vec3 vec3_unit(Vec3 v) {
   return vec3_scale(v, 1.0f / vec3_length(v));
+}
+
+static Vec3 vec3_random_unit(void) {
+  while (true) {
+    Vec3 p = vec3_random_between(-1.0f, 1.0f);
+    float lensq = vec3_length_squared(p);
+    if (1e-30f < lensq && lensq <= 1) {
+      return vec3_scale(p, 1.0f / sqrtf(lensq));
+    }
+  }
+}
+
+static Vec3 vec3_random_on_hemisphere(Vec3 normal) {
+  Vec3 on_unit_sphere = vec3_random_unit();
+  if (vec3_dot(on_unit_sphere, normal) > 0.0f) {
+    return on_unit_sphere;
+  } else {
+    return vec3_neg(on_unit_sphere);
+  }
 }
 
 static Vec3 vec3_lerp(Vec3 a, Vec3 b, float t) {
