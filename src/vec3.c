@@ -1,77 +1,55 @@
 typedef struct {
-  float x;
-  float y;
-  float z;
+  float x, y, z;
 } Vec3;
 
-static Vec3 vec3_negate(Vec3 self) {
+static Vec3 vec3_neg(Vec3 v) {
+  return (Vec3){-v.x, -v.y, -v.z};
+}
+
+static Vec3 vec3_add(Vec3 a, Vec3 b) {
+  return (Vec3){a.x + b.x, a.y + b.y, a.z + b.z};
+}
+
+static Vec3 vec3_sub(Vec3 a, Vec3 b) {
+  return (Vec3){a.x - b.x, a.y - b.y, a.z - b.z};
+}
+
+static Vec3 vec3_mul(Vec3 a, Vec3 b) {
+  return (Vec3){a.x * b.x, a.y * b.y, a.z * b.z};
+}
+
+static Vec3 vec3_scale(Vec3 v, float s) {
+  return (Vec3){v.x * s, v.y * s, v.z * s};
+}
+
+static float vec3_dot(Vec3 a, Vec3 b) {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+static Vec3 vec3_cross(Vec3 a, Vec3 b) {
   return (Vec3){
-    .x = -self.x,
-    .y = -self.y,
-    .z = -self.z,
+    a.y * b.z - a.z * b.y,
+    a.z * b.x - a.x * b.z,
+    a.x * b.y - a.y * b.x,
   };
 }
 
-static Vec3 vec3_add(Vec3 self, Vec3 other) {
-  return (Vec3){
-    .x = self.x + other.x,
-    .y = self.y + other.y,
-    .z = self.z + other.z,
-  };
+static float vec3_length_squared(Vec3 v) {
+  return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-static Vec3 vec3_subtract(Vec3 self, Vec3 other) {
-  return (Vec3){
-    .x = self.x - other.x,
-    .y = self.y - other.y,
-    .z = self.z - other.z,
-  };
+static float vec3_length(Vec3 v) {
+  return sqrtf(vec3_length_squared(v));
 }
 
-static Vec3 vec3_multiply(Vec3 self, Vec3 other) {
-  return (Vec3){
-    .x = self.x * other.x,
-    .y = self.y * other.y,
-    .z = self.z * other.z,
-  };
+static Vec3 vec3_unit(Vec3 v) {
+  return vec3_scale(v, 1.0f / vec3_length(v));
 }
 
-static Vec3 vec3_scale(Vec3 self, float amount) {
-  return (Vec3){
-    .x = self.x * amount,
-    .y = self.y * amount,
-    .z = self.z * amount,
-  };
+static Vec3 vec3_lerp(Vec3 a, Vec3 b, float t) {
+  return vec3_add(vec3_scale(a, 1.0f - t), vec3_scale(b, t));
 }
 
-static float vec3_dot(Vec3 self, Vec3 other) {
-  return (self.x * other.x) + (self.y * other.y) + (self.z * other.z);
-}
-
-static Vec3 vec3_cross(Vec3 self, Vec3 other) {
-  return (Vec3){
-    .x = (self.y * other.z) - (self.z * other.y),
-    .y = (self.z * other.x) - (self.x * other.z),
-    .z = (self.x * other.y) - (self.y * other.x),
-  };
-}
-
-static float vec3_length_squared(Vec3 self) {
-  return (self.x * self.x) + (self.y * self.y) + (self.z * self.z);
-}
-
-static float vec3_length(Vec3 self) {
-  return sqrtf(vec3_length_squared(self));
-}
-
-static Vec3 vec3_unit(Vec3 self) {
-  return vec3_scale(self, 1.0f / vec3_length(self));
-}
-
-static Vec3 vec3_lerp(Vec3 self, Vec3 other, float alpha) {
-  return vec3_add(vec3_scale(self, 1.0f - alpha), vec3_scale(other, alpha));
-}
-
-static void vec3_write(Vec3 self, FILE *stream) {
-  fprintf(stream, "%f %f %f", (double)self.x, (double)self.y, (double)self.z);
+static void vec3_write(Vec3 v, FILE *f) {
+  fprintf(f, "%f %f %f", (double)v.x, (double)v.y, (double)v.z);
 }

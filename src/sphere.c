@@ -4,10 +4,10 @@ typedef struct {
   float radius;
 } Sphere;
 
-static bool sphere_hit(const Hittable *self, const Ray3 *ray, float ray_tmin, float ray_tmax, HitRecord *record) {
-  const Sphere *sphere = (const Sphere *)self;
+static bool sphere_hit(const Hittable *base, const Ray3 *ray, float ray_tmin, float ray_tmax, HitRecord *hit) {
+  const Sphere *sphere = (const Sphere *)base;
 
-  Vec3 oc = vec3_subtract(sphere->center, ray->origin);
+  Vec3 oc = vec3_sub(sphere->center, ray->origin);
   float a = vec3_length_squared(ray->direction);
   float h = vec3_dot(ray->direction, oc);
   float c = vec3_length_squared(oc) - sphere->radius * sphere->radius;
@@ -24,12 +24,12 @@ static bool sphere_hit(const Hittable *self, const Ray3 *ray, float ray_tmin, fl
   }
 
   Point3 sphere_point = ray3_at(*ray, root);
-  Vec3 sphere_normal = vec3_subtract(sphere_point, sphere->center);
+  Vec3 sphere_normal = vec3_sub(sphere_point, sphere->center);
   Vec3 sphere_unit_normal = vec3_scale(sphere_normal, 1.0f / sphere->radius);
 
-  record->t = root;
-  record->p = sphere_point;
-  record->normal = sphere_unit_normal;
+  hit->t = root;
+  hit->p = sphere_point;
+  hit->normal = sphere_unit_normal;
 
   return true;
 }

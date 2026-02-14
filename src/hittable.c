@@ -5,5 +5,5 @@ typedef struct {
 } HitRecord;
 
 typedef struct Hittable {
-  bool (*hit)(const struct Hittable *self, const Ray3 *ray, float t_min, float t_max, HitRecord *rec);
+  bool (*hit)(const struct Hittable *base, const Ray3 *ray, float t_min, float t_max, HitRecord *hit);
 } Hittable;
