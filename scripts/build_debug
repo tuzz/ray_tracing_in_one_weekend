@@ -6,7 +6,7 @@ rm -rf build/debug
 mkdir -p build/debug
 
 clang src/main.c \
-  -std=c99 -g -ffast-math -Weverything -Werror -pedantic-errors -fsanitize=address,undefined \
+  -std=c99 -g -Weverything -Werror -pedantic-errors -fsanitize=address,undefined \
   -Wno-padded -Wno-declaration-after-statement -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function \
   -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk \
   -Wl,-dead_strip -Wl,-map,build/debug/main.map \

@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "util.c"
 #include "vec3.c"
 #include "point3.c"
 #include "color3.c"
