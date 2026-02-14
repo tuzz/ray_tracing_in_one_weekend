@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "vec3.c"
 #include "point3.c"
 #include "color3.c"
 #include "ray3.c"
 #include "hit.c"
 #include "hittable.c"
+#include "hittable_list.c"
 #include "sphere.c"
 
 static Color3 ray3_color(const Ray3 *r, const Hittable *hittable) {
