@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "util.c"
 #include "vec3.c"
 #include "point3.c"
@@ -16,6 +17,8 @@
 #include "camera.c"
 
 int main(void) {
+  srand((unsigned int)time(NULL));
+
   HittableList list = {0};
   Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
 
