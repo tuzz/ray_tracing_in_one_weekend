@@ -1,7 +1,10 @@
 typedef struct {
   float aspect_ratio;
   int image_width;
+  int samples_per_pixel;
+  // private
   int image_height;
+  float pixel_samples_scale;
   Point3 center;
   Point3 pixel00_loc;
   Vec3 pixel_delta_u;
@@ -12,6 +15,7 @@ static void camera_initialize(Camera *c) {
   c->image_height = (int)(c->image_width / c->aspect_ratio);
   c->image_height = (c->image_height < 1) ? 1 : c->image_height;
 
+  c->pixel_samples_scale = 1.0f / c->samples_per_pixel;
   c->center = (Point3){0, 0, 0};
 
   float focal_length = 1.0f;
@@ -29,6 +33,21 @@ static void camera_initialize(Camera *c) {
   Point3 viewport_top_left = vec3_sub(viewport_mid_left, vec3_scale(viewport_v, 0.5f));
 
   c->pixel00_loc = vec3_add(viewport_top_left, vec3_scale(vec3_add(c->pixel_delta_u, c->pixel_delta_v), 0.5f));
+}
+
+static Vec3 camera_sample_square(const Camera *c) {
+  return (Vec3){random_float() - 0.5f, random_float() - 0.5f, 0.0f};
+}
+
+static Ray3 camera_get_ray(const Camera *c, int i, int j) {
+  Vec3 offset = camera_sample_square(c);
+
+  Vec3 pixel_x_offset = vec3_scale(c->pixel_delta_u, i + offset.x);
+  Vec3 pixel_y_offset = vec3_scale(c->pixel_delta_v, j + offset.y);
+  Point3 pixel_sample = vec3_add(vec3_add(c->pixel00_loc, pixel_x_offset), pixel_y_offset);
+
+  Vec3 ray_direction = vec3_sub(pixel_sample, c->center);
+  return (Ray3){.origin = c->center, .direction = ray_direction};
 }
 
 static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, const Hittable *world) {
@@ -51,17 +70,12 @@ static void camera_render(Camera *c, const Hittable *world) {
   for (int j = 0; j < c->image_height; j++) {
     fprintf(stderr, "\rScanlines remaining: %d ", (c->image_height - j));
     for (int i = 0; i < c->image_width; i++) {
-      Vec3 pixel_x_offset = vec3_scale(c->pixel_delta_u, i);
-      Vec3 pixel_y_offset = vec3_scale(c->pixel_delta_v, j);
-
-      Point3 pixel_center = vec3_add(c->pixel00_loc, pixel_x_offset);
-      pixel_center = vec3_add(pixel_center, pixel_y_offset);
-
-      Vec3 ray_direction = vec3_sub(pixel_center, c->center);
-      Ray3 ray = {.origin = c->center, .direction = ray_direction};
-
-      Color3 pixel_color = camera_ray_color(c, &ray, world);
-      color3_write_line(pixel_color, stdout);
+      Color3 pixel_color = {0.0f, 0.0f, 0.0f};
+      for (int sample = 0; sample < c->samples_per_pixel; sample++) {
+        Ray3 ray = camera_get_ray(c, i, j);
+        pixel_color = vec3_add(pixel_color, camera_ray_color(c, &ray, world));
+      }
+      color3_write_line(vec3_scale(pixel_color, c->pixel_samples_scale), stdout);
     }
   }
 
