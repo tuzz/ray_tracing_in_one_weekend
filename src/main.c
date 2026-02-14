@@ -12,10 +12,10 @@
 #include "hittable_list.c"
 #include "sphere.c"
 
-static Color3 ray3_color(const Ray3 *r, const Hittable *hittable) {
+static Color3 ray3_color(const Ray3 *r, const Hittable *world) {
   Hit hit;
-  if (hittable->hit(hittable, r, 0.0f, 999.0f, &hit)) {
-    return vec3_scale((Vec3){hit.normal.x + 1.0f, hit.normal.y + 1.0f, hit.normal.z + 1.0f}, 0.5f);
+  if (world->hit(world, r, 0.0f, INFINITY, &hit)) {
+    return vec3_scale(vec3_add(hit.normal, (Vec3){1.0f, 1.0f, 1.0f}), 0.5f);
   }
 
   Vec3 unit_direction = vec3_unit(r->direction);
@@ -34,6 +34,13 @@ int main(void) {
   int image_height = (int)(image_width / aspect_ratio);
   image_height = (image_height < 1) ? 1 : image_height;
 
+  Sphere sphere1 = {.base.hit = sphere_hit, .center = {0.0f, 0.0f, -1.0f}, .radius = 0.5f};
+  Sphere sphere2 = {.base.hit = sphere_hit, .center = {0.0f, -100.5f, -1.0f}, .radius = 100.0f};
+
+  HittableList world = {.base.hit = hittable_list_hit};
+  hittable_list_add(&world, (Hittable *)&sphere1);
+  hittable_list_add(&world, (Hittable *)&sphere2);
+
   float focal_length = 1.0f;
   float viewport_height = 2.0f;
   float viewport_width = viewport_height * image_width / image_height;
@@ -51,7 +58,6 @@ int main(void) {
   Point3 pixel00_loc = vec3_add(viewport_top_left, vec3_scale(vec3_add(pixel_delta_u, pixel_delta_v), 0.5f));
 
   printf("P3\n%d %d\n255\n", image_width, image_height);
-  Sphere sphere = {.base.hit = sphere_hit, .center = {0.0f, 0.0f, -1.0f}, .radius = 0.5};
 
   for (int j = 0; j < image_height; j++) {
     fprintf(stderr, "\rScanlines remaining: %d ", (image_height - j));
@@ -64,7 +70,7 @@ int main(void) {
       Vec3 ray_direction = vec3_sub(pixel_center, camera_center);
       Ray3 r = {.origin = camera_center, .direction = ray_direction};
 
-      Color3 pixel_color = ray3_color(&r, (Hittable *)&sphere);
+      Color3 pixel_color = ray3_color(&r, (Hittable *)&world);
       color3_write_line(pixel_color, stdout);
     }
   }
