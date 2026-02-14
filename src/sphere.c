@@ -4,7 +4,7 @@ typedef struct {
   float radius;
 } Sphere;
 
-static bool sphere_hit(const Hittable *base, const Ray3 *ray, float ray_tmin, float ray_tmax, HitRecord *hit) {
+static bool sphere_hit(const Hittable *base, const Ray3 *ray, float ray_tmin, float ray_tmax, Hit *hit) {
   const Sphere *sphere = (const Sphere *)base;
 
   Vec3 oc = vec3_sub(sphere->center, ray->origin);
@@ -23,13 +23,13 @@ static bool sphere_hit(const Hittable *base, const Ray3 *ray, float ray_tmin, fl
     if (root <= ray_tmin || ray_tmax <= root) return false;
   }
 
-  Point3 sphere_point = ray3_at(*ray, root);
-  Vec3 sphere_normal = vec3_sub(sphere_point, sphere->center);
-  Vec3 sphere_unit_normal = vec3_scale(sphere_normal, 1.0f / sphere->radius);
+  Point3 intersection = ray3_at(*ray, root);
+  Vec3 normal = vec3_sub(intersection, sphere->center);
+  Vec3 unit_normal = vec3_scale(normal, 1.0f / sphere->radius);
 
   hit->t = root;
-  hit->p = sphere_point;
-  hit->normal = sphere_unit_normal;
+  hit->p = intersection;
+  hit_set_face_normal(hit, ray, unit_normal);
 
   return true;
 }

@@ -5,11 +5,12 @@
 #include "point3.c"
 #include "color3.c"
 #include "ray3.c"
+#include "hit.c"
 #include "hittable.c"
 #include "sphere.c"
 
 static Color3 ray3_color(const Ray3 *r, const Hittable *hittable) {
-  HitRecord hit;
+  Hit hit;
   if (hittable->hit(hittable, r, 0.0f, 999.0f, &hit)) {
     return vec3_scale((Vec3){hit.normal.x + 1.0f, hit.normal.y + 1.0f, hit.normal.z + 1.0f}, 0.5f);
   }
