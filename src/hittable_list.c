@@ -18,13 +18,13 @@ static void hittable_list_add(HittableList *h, Hittable hittable) {
   h->items[h->length++] = hittable;
 }
 
-static bool hittable_list_hit(const HittableList *h, const Ray3 *ray, float ray_tmin, float ray_tmax, Hit *hit) {
+static bool hittable_list_hit(const HittableList *h, const Ray3 *ray, Interval ray_t, Hit *hit) {
   Hit tmp_hit;
   bool hit_anything = false;
-  float closest_so_far = ray_tmax;
+  float closest_so_far = ray_t.max;
 
   for (size_t i = 0; i < h->length; i++) {
-    if (hittable_hit(&h->items[i], ray, ray_tmin, closest_so_far, &tmp_hit)) {
+    if (hittable_hit(&h->items[i], ray, (Interval){ray_t.min, closest_so_far}, &tmp_hit)) {
       hit_anything = true;
       closest_so_far = tmp_hit.t;
       *hit = tmp_hit;

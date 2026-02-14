@@ -7,15 +7,16 @@
 #include "vec3.c"
 #include "point3.c"
 #include "color3.c"
+#include "interval.c"
 #include "ray3.c"
 #include "hit.c"
 #include "sphere.c"
 #include "hittable.c"
 #include "hittable_list.c"
 
-static Color3 ray3_color(const Ray3 *r, const Hittable *world) {
+static Color3 ray3_color(const Ray3 *r, const HittableList *world) {
   Hit hit;
-  if (hittable_hit(world, r, 0.0f, INFINITY, &hit)) {
+  if (hittable_list_hit(world, r, (Interval){0.0f, INFINITY}, &hit)) {
     return vec3_scale(vec3_add(hit.normal, (Vec3){1.0f, 1.0f, 1.0f}), 0.5f);
   }
 
@@ -35,10 +36,9 @@ int main(void) {
   int image_height = (int)(image_width / aspect_ratio);
   image_height = (image_height < 1) ? 1 : image_height;
 
-  HittableList list = {0};
-  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, 0.0f, -1.0f}, .radius = 0.5f}});
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, -100.5f, -1.0f}, .radius = 100.0f}});
+  HittableList world = {0};
+  hittable_list_add(&world, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, 0.0f, -1.0f}, .radius = 0.5f}});
+  hittable_list_add(&world, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, -100.5f, -1.0f}, .radius = 100.0f}});
 
   float focal_length = 1.0f;
   float viewport_height = 2.0f;

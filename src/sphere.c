@@ -3,7 +3,7 @@ typedef struct {
   float radius;
 } Sphere;
 
-static bool sphere_hit(const Sphere *s, const Ray3 *ray, float ray_tmin, float ray_tmax, Hit *hit) {
+static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hit) {
   Vec3 oc = vec3_sub(s->center, ray->origin);
   float a = vec3_length_squared(ray->direction);
   float h = vec3_dot(ray->direction, oc);
@@ -15,9 +15,9 @@ static bool sphere_hit(const Sphere *s, const Ray3 *ray, float ray_tmin, float r
   float sqrt = sqrtf(discriminant);
   float root = (h - sqrt) / a;
 
-  if (root <= ray_tmin || ray_tmax <= root) {
+  if (!interval_surrounds(ray_t, root)) {
     root = (h + sqrt) / a;
-    if (root <= ray_tmin || ray_tmax <= root) return false;
+    if (!interval_surrounds(ray_t, root)) return false;
   }
 
   Point3 intersection = ray3_at(*ray, root);
