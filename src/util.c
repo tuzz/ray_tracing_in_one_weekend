@@ -11,3 +11,7 @@ static float random_float(void) {
 static float random_between(float min, float max) {
   return min + (max - min) * random_float();
 }
+
+static float linear_to_gamma(float linear_component) {
+  return linear_component > 0 ? sqrtf(linear_component) : 0.0f;
+}
