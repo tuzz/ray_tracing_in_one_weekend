@@ -25,6 +25,6 @@ int main(void) {
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, 0.0f, -1.0f}, .radius = 0.5f}});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, -100.5f, -1.0f}, .radius = 100.0f}});
 
-  Camera camera = {.aspect_ratio = 16.0f / 9.0f, .image_width = 400, .samples_per_pixel = 10};
+  Camera camera = {.aspect_ratio = 16.0f / 9.0f, .image_width = 400, .samples_per_pixel = 10, .max_depth = 10};
   camera_render(&camera, &world);
 }
