@@ -1,16 +1,13 @@
 typedef struct {
-  Hittable base;
   Point3 center;
   float radius;
 } Sphere;
 
-static bool sphere_hit(const Hittable *base, const Ray3 *ray, float ray_tmin, float ray_tmax, Hit *hit) {
-  const Sphere *sphere = (const Sphere *)base;
-
-  Vec3 oc = vec3_sub(sphere->center, ray->origin);
+static bool sphere_hit(const Sphere *s, const Ray3 *ray, float ray_tmin, float ray_tmax, Hit *hit) {
+  Vec3 oc = vec3_sub(s->center, ray->origin);
   float a = vec3_length_squared(ray->direction);
   float h = vec3_dot(ray->direction, oc);
-  float c = vec3_length_squared(oc) - sphere->radius * sphere->radius;
+  float c = vec3_length_squared(oc) - s->radius * s->radius;
 
   float discriminant = h * h - a * c;
   if (discriminant < 0) return false;
@@ -24,8 +21,8 @@ static bool sphere_hit(const Hittable *base, const Ray3 *ray, float ray_tmin, fl
   }
 
   Point3 intersection = ray3_at(*ray, root);
-  Vec3 normal = vec3_sub(intersection, sphere->center);
-  Vec3 unit_normal = vec3_scale(normal, 1.0f / sphere->radius);
+  Vec3 normal = vec3_sub(intersection, s->center);
+  Vec3 unit_normal = vec3_scale(normal, 1.0f / s->radius);
 
   hit->t = root;
   hit->p = intersection;

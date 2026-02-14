@@ -1,16 +1,15 @@
 #define MAX_HITTABLES 100
 
-typedef struct {
-  Hittable base;
-  Hittable *items[MAX_HITTABLES];
+struct HittableList {
+  Hittable items[MAX_HITTABLES];
   size_t length;
-} HittableList;
+};
 
 static void hittable_list_clear(HittableList *h) {
   h->length = 0;
 }
 
-static void hittable_list_add(HittableList *h, Hittable *hittable) {
+static void hittable_list_add(HittableList *h, Hittable hittable) {
   if (h->length == MAX_HITTABLES) {
     fprintf(stderr, "HittableList is full\n");
     exit(EXIT_FAILURE);
@@ -19,18 +18,13 @@ static void hittable_list_add(HittableList *h, Hittable *hittable) {
   h->items[h->length++] = hittable;
 }
 
-
-static bool hittable_list_hit(const Hittable *base, const Ray3 *ray, float ray_tmin, float ray_tmax, Hit *hit) {
-  const HittableList *h = (const HittableList *)base;
-
+static bool hittable_list_hit(const HittableList *h, const Ray3 *ray, float ray_tmin, float ray_tmax, Hit *hit) {
   Hit tmp_hit;
   bool hit_anything = false;
   float closest_so_far = ray_tmax;
 
   for (size_t i = 0; i < h->length; i++) {
-    const Hittable *object = h->items[i];
-
-    if (object->hit(object, ray, ray_tmin, closest_so_far, &tmp_hit)) {
+    if (hittable_hit(&h->items[i], ray, ray_tmin, closest_so_far, &tmp_hit)) {
       hit_anything = true;
       closest_so_far = tmp_hit.t;
       *hit = tmp_hit;
