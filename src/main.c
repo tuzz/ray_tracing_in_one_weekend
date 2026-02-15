@@ -23,34 +23,65 @@
 int main(void) {
   srand((unsigned int)time(NULL));
 
-  Material material_ground = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.8f, 0.8f, 0.0f}}};
-  Material material_center = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.1f, 0.2f, 0.5f}}};
-  Material material_left = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.5f}};
-  Material material_bubble = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.0f / 1.5f}};
-  Material material_right = {.type = MATERIAL_METAL, .u.metal = {.albedo = {0.8f, 0.6f, 0.2f}, .fuzz = 1.0f}};
-
   HittableList list = {0};
   Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
 
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, -100.5f, -1.0f}, .radius = 100.0f, .material = &material_ground}});
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, 0.0f, -1.2f}, .radius = 0.5f, .material = &material_center}});
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {-1.0f, 0.0f, -1.0f}, .radius = 0.5f, .material = &material_left}});
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {-1.0f, 0.0f, -1.0f}, .radius = 0.4f, .material = &material_bubble}});
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {1.0f, 0.0f, -1.0f}, .radius = 0.5f, .material = &material_right}});
+  Material ground_material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = {0.5f, 0.5f, 0.5f}};
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, -1000.0f, 0.0f}, .radius = 1000.0f, .material = &ground_material}});
+
+  Material materials[500] = {0};
+  int material_count = 0;
+
+  for (int a = -11; a < 11; a++) {
+    for (int b = -11; b < 11; b++) {
+      float choose_mat = random_float();
+      Point3 center = {a + 0.9f * random_float(), 0.2f, b + 0.9f * random_float()};
+
+      if (vec3_length(vec3_sub(center, (Point3){4.0f, 0.2f, 0.0f})) > 0.9f) {
+        Material *sphere_material = &materials[material_count++];
+
+        if (choose_mat < 0.8f) {
+          // diffuse
+          Color3 albedo = vec3_mul(vec3_random(), vec3_random());
+          *sphere_material = (Material){.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = albedo};
+          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = center, .radius = 0.2f, .material = sphere_material}});
+        } else if (choose_mat < 0.95f) {
+          // metal
+          Color3 albedo = vec3_random_between(0.5f, 1.0f);
+          float fuzz = random_between(0.0, 0.5f);
+          *sphere_material = (Material){.type = MATERIAL_METAL, .u.metal = {.albedo = albedo, .fuzz = fuzz}};
+          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = center, .radius = 0.2f, .material = sphere_material}});
+        } else {
+          // glass
+          *sphere_material = (Material){.type = MATERIAL_DIELECTRIC, .u.dielectric.refaction_index = 1.5f};
+          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = center, .radius = 0.2f, .material = sphere_material}});
+        }
+      }
+    }
+  }
+
+  Material material1 = {.type = MATERIAL_DIELECTRIC, .u.dielectric.refaction_index = 1.5f};
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, 1.0f, 0.0f}, .radius = 1.0f, .material = &material1}});
+
+  Material material2 = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = {0.4f, 0.2f, 0.1f}};
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {-4.0f, 1.0f, 0.0f}, .radius = 1.0f, .material = &material2}});
+
+  Material material3 = {.type = MATERIAL_METAL, .u.metal = {.albedo = {0.7f, 0.6f, 0.5f}, .fuzz = 0.0f}};
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {4.0f, 1.0f, 0.0f}, .radius = 1.0f, .material = &material3}});
 
   Camera camera = {0};
   camera.aspect_ratio = 16.0f / 9.0f;
-  camera.image_width = 400;
-  camera.samples_per_pixel = 10;
-  camera.max_depth = 10;
+  camera.image_width = 1200;
+  camera.samples_per_pixel = 500;
+  camera.max_depth = 50;
 
   camera.vfov = 20.0f;
-  camera.lookfrom = (Point3){-2.0f, 2.0f, 1.0f};
-  camera.lookat = (Point3){0.0f, 0.0f, -1.0f};
+  camera.lookfrom = (Point3){13.0f, 2.0f, 3.0f};
+  camera.lookat = (Point3){0.0f, 0.0f, 0.0f};
   camera.vup = (Point3){0.0f, 1.0f, 0.0f};
 
-  camera.defocus_angle = 10.0f;
-  camera.focus_dist = 3.4f;
+  camera.defocus_angle = 0.6f;
+  camera.focus_dist = 10.0f;
 
   camera_render(&camera, &world);
 }

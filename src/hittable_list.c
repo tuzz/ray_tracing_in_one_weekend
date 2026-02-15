@@ -1,4 +1,4 @@
-#define MAX_HITTABLES 100
+#define MAX_HITTABLES 1000
 
 struct HittableList {
   Hittable items[MAX_HITTABLES];
