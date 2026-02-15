@@ -16,6 +16,7 @@
 #include "hittable_list.c"
 #include "lambertian.c"
 #include "metal.c"
+#include "dielectric.c"
 #include "material.c"
 #include "camera.c"
 
@@ -24,7 +25,7 @@ int main(void) {
 
   Material material_ground = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.8f, 0.8f, 0.0f}}};
   Material material_center = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.1f, 0.2f, 0.5f}}};
-  Material material_left = {.type = MATERIAL_METAL, .u.metal = {.albedo = {0.8f, 0.8f, 0.8f}, .fuzz = 0.3f}};
+  Material material_left = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.5f}};
   Material material_right = {.type = MATERIAL_METAL, .u.metal = {.albedo = {0.8f, 0.6f, 0.2f}, .fuzz = 1.0f}};
 
   HittableList list = {0};

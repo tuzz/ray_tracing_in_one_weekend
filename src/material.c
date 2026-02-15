@@ -1,6 +1,7 @@
 typedef enum {
   MATERIAL_LAMBERTIAN,
   MATERIAL_METAL,
+  MATERIAL_DIELECTRIC,
 } MaterialType;
 
 struct Material {
@@ -8,6 +9,7 @@ struct Material {
   union {
     Lambertian lambertian;
     Metal metal;
+    Dielectric dielectric;
   } u;
 };
 
@@ -17,6 +19,8 @@ static bool material_scatter(const Material *m, const Ray3 *ray, const Hit *hit,
       return lambertian_scatter(&m->u.lambertian, ray, hit, attentuation, scattered);
     case MATERIAL_METAL:
       return metal_scatter(&m->u.metal, ray, hit, attentuation, scattered);
+    case MATERIAL_DIELECTRIC:
+      return dielectric_scatter(&m->u.dielectric, ray, hit, attentuation, scattered);
     default:
       assert(false && "Unknown Material");
   }

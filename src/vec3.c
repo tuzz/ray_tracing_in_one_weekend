@@ -82,6 +82,13 @@ static Vec3 vec3_reflect(Vec3 v, Vec3 n) {
   return vec3_sub(v, b);
 }
 
+static Vec3 vec3_refract(Vec3 uv, Vec3 n, float etai_over_etat) {
+  float cos_theta = fminf(vec3_dot(vec3_neg(uv), n), 1.0f);
+  Vec3 r_out_perp =  vec3_scale(vec3_add(uv, vec3_scale(n, cos_theta)), etai_over_etat);
+  Vec3 r_out_parallel = vec3_scale(n, -sqrtf(fabsf(1.0f - vec3_length_squared(r_out_perp))));
+  return vec3_add(r_out_perp, r_out_parallel);
+}
+
 static Vec3 vec3_lerp(Vec3 a, Vec3 b, float t) {
   return vec3_add(vec3_scale(a, 1.0f - t), vec3_scale(b, t));
 }
