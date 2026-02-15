@@ -25,7 +25,7 @@ int main(void) {
 
   Material material_ground = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.8f, 0.8f, 0.0f}}};
   Material material_center = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.1f, 0.2f, 0.5f}}};
-  Material material_left = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.5f}};
+  Material material_left = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.0f / 1.33f}};
   Material material_right = {.type = MATERIAL_METAL, .u.metal = {.albedo = {0.8f, 0.6f, 0.2f}, .fuzz = 1.0f}};
 
   HittableList list = {0};
