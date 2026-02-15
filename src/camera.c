@@ -55,12 +55,14 @@ static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, int depth, cons
   if (depth <= 0) return BLACK;
 
   Hit hit;
-  Color3 attenuation;
-  Ray3 scattered;
 
   if (hittable_hit(world, ray, (Interval){0.001f, INFINITY}, &hit)) {
-    material_scatter(hit.material, ray, &hit, &attenuation, &scattered);
-    return vec3_mul(attenuation, camera_ray_color(c, &scattered, depth - 1, world));
+    Ray3 scattered;
+    Color3 attenuation;
+    if (material_scatter(hit.material, ray, &hit, &attenuation, &scattered)) {
+      return vec3_mul(attenuation, camera_ray_color(c, &scattered, depth - 1, world));
+    }
+    return BLACK;
   }
 
   Vec3 unit_direction = vec3_unit(ray->direction);

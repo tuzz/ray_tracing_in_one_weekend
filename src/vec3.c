@@ -77,6 +77,11 @@ static Vec3 vec3_random_on_hemisphere(Vec3 normal) {
   }
 }
 
+static Vec3 vec3_reflect(Vec3 v, Vec3 n) {
+  Vec3 b = vec3_scale(n, 2.0f * vec3_dot(v, n));
+  return vec3_sub(v, b);
+}
+
 static Vec3 vec3_lerp(Vec3 a, Vec3 b, float t) {
   return vec3_add(vec3_scale(a, 1.0f - t), vec3_scale(b, t));
 }
