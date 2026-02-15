@@ -4,6 +4,9 @@ typedef struct {
   int samples_per_pixel;
   int max_depth;
   float vfov;
+  Point3 lookfrom;
+  Point3 lookat;
+  Vec3 vup;
   // private
   int image_height;
   float pixel_samples_scale;
@@ -11,6 +14,7 @@ typedef struct {
   Point3 pixel00_loc;
   Vec3 pixel_delta_u;
   Vec3 pixel_delta_v;
+  Vec3 u, v, w;
 } Camera;
 
 static void camera_initialize(Camera *c) {
@@ -18,21 +22,25 @@ static void camera_initialize(Camera *c) {
   c->image_height = (c->image_height < 1) ? 1 : c->image_height;
 
   c->pixel_samples_scale = 1.0f / c->samples_per_pixel;
-  c->center = (Point3){0, 0, 0};
+  c->center = c->lookfrom;
 
-  float focal_length = 1.0f;
+  float focal_length = vec3_length(vec3_sub(c->lookfrom, c->lookat));
   float theta = degrees_to_radians(c->vfov);
   float h = tanf(theta / 2.0f);
   float viewport_height = 2.0f * h * focal_length;
   float viewport_width = viewport_height * c->image_width / c->image_height;
 
-  Vec3 viewport_u = {.x = viewport_width};
-  Vec3 viewport_v = {.y = -viewport_height};
+  c->w = vec3_unit(vec3_sub(c->lookfrom, c->lookat));
+  c->u = vec3_unit(vec3_cross(c->vup, c->w));
+  c->v = vec3_cross(c->w, c->u);
+
+  Vec3 viewport_u = vec3_scale(c->u, viewport_width);
+  Vec3 viewport_v = vec3_scale(c->v, -viewport_height);
 
   c->pixel_delta_u = vec3_scale(viewport_u, 1.0f / c->image_width);
   c->pixel_delta_v = vec3_scale(viewport_v, 1.0f / c->image_height);
 
-  Point3 viewport_mid_mid = vec3_sub(c->center, (Vec3){.z = focal_length});
+  Point3 viewport_mid_mid = vec3_sub(c->center, vec3_scale(c->w, focal_length));
   Point3 viewport_mid_left = vec3_sub(viewport_mid_mid, vec3_scale(viewport_u, 0.5f));
   Point3 viewport_top_left = vec3_sub(viewport_mid_left, vec3_scale(viewport_v, 0.5f));
 
