@@ -49,5 +49,8 @@ int main(void) {
   camera.lookat = (Point3){0.0f, 0.0f, -1.0f};
   camera.vup = (Point3){0.0f, 1.0f, 0.0f};
 
+  camera.defocus_angle = 10.0f;
+  camera.focus_dist = 3.4f;
+
   camera_render(&camera, &world);
 }

@@ -58,6 +58,13 @@ static Vec3 vec3_unit(Vec3 v) {
   return vec3_scale(v, 1.0f / vec3_length(v));
 }
 
+static Vec3 vec3_random_in_unit_disk(void) {
+  while (true) {
+    Vec3 p = (Vec3){random_between(-1.0f, 1.0f), random_between(-1.0f, 1.0f), 0.0f};
+    if (vec3_length_squared(p) < 1.0f) return p;
+  }
+}
+
 static Vec3 vec3_random_unit(void) {
   while (true) {
     Vec3 p = vec3_random_between(-1.0f, 1.0f);
