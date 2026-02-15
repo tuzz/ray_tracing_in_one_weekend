@@ -1,6 +1,7 @@
 typedef struct {
   Point3 center;
   float radius;
+  Material *material;
 } Sphere;
 
 static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hit) {
@@ -27,6 +28,7 @@ static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hi
   hit->t = root;
   hit->p = intersection;
   hit_set_face_normal(hit, ray, unit_normal);
+  hit->material = s->material;
 
   return true;
 }

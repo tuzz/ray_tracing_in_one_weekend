@@ -42,6 +42,10 @@ static float vec3_length(Vec3 v) {
   return sqrtf(vec3_length_squared(v));
 }
 
+static bool vec3_near_zero(Vec3 v) {
+  return fabsf(v.x) < 1e-8f && fabsf(v.y) < 1e-8f && fabsf(v.z) < 1e-8f;
+}
+
 static Vec3 vec3_random(void) {
   return (Vec3){random_float(), random_float(), random_float()};
 }

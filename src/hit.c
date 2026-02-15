@@ -1,6 +1,9 @@
+typedef struct Material Material;
+
 typedef struct {
   Point3 p;
   Vec3 normal;
+  Material *material;
   float t;
   bool front_face;
 } Hit;
