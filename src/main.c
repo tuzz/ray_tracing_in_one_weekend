@@ -25,7 +25,8 @@ int main(void) {
 
   Material material_ground = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.8f, 0.8f, 0.0f}}};
   Material material_center = {.type = MATERIAL_LAMBERTIAN, .u.lambertian = {.albedo = {0.1f, 0.2f, 0.5f}}};
-  Material material_left = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.0f / 1.33f}};
+  Material material_left = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.5f}};
+  Material material_bubble = {.type = MATERIAL_DIELECTRIC, .u.dielectric = {.refaction_index = 1.0f / 1.5f}};
   Material material_right = {.type = MATERIAL_METAL, .u.metal = {.albedo = {0.8f, 0.6f, 0.2f}, .fuzz = 1.0f}};
 
   HittableList list = {0};
@@ -34,6 +35,7 @@ int main(void) {
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, -100.5f, -1.0f}, .radius = 100.0f, .material = &material_ground}});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {0.0f, 0.0f, -1.2f}, .radius = 0.5f, .material = &material_center}});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {-1.0f, 0.0f, -1.0f}, .radius = 0.5f, .material = &material_left}});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {-1.0f, 0.0f, -1.0f}, .radius = 0.4f, .material = &material_bubble}});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = {1.0f, 0.0f, -1.0f}, .radius = 0.5f, .material = &material_right}});
 
   Camera camera = {.aspect_ratio = 16.0f / 9.0f, .image_width = 400, .samples_per_pixel = 10, .max_depth = 10};
