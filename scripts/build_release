@@ -6,7 +6,7 @@ rm -rf build/release
 mkdir -p build/release
 
 clang src/main.c \
-  -std=c99 -O3 -flto -Weverything -Werror -pedantic-errors \
+  -std=c99 -O3 -ffast-math -march=native -flto -Weverything -Werror -pedantic-errors \
   -Wno-padded -Wno-declaration-after-statement -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-covered-switch-default \
   -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk \
   -Wl,-dead_strip -Wl,-map,build/release/main.map \

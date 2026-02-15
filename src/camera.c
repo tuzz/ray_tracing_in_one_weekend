@@ -82,7 +82,7 @@ static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, int depth, cons
 
   Hit hit;
 
-  if (hittable_hit(world, ray, (Interval){0.001f, INFINITY}, &hit)) {
+  if (hittable_hit(world, ray, (Interval){0.001f, FLT_MAX}, &hit)) {
     Ray3 scattered;
     Color3 attenuation;
     if (material_scatter(hit.material, ray, &hit, &attenuation, &scattered)) {
