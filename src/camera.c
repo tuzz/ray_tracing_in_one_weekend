@@ -3,6 +3,7 @@ typedef struct {
   int image_width;
   int samples_per_pixel;
   int max_depth;
+  float vfov;
   // private
   int image_height;
   float pixel_samples_scale;
@@ -20,7 +21,9 @@ static void camera_initialize(Camera *c) {
   c->center = (Point3){0, 0, 0};
 
   float focal_length = 1.0f;
-  float viewport_height = 2.0f;
+  float theta = degrees_to_radians(c->vfov);
+  float h = tanf(theta / 2.0f);
+  float viewport_height = 2.0f * h * focal_length;
   float viewport_width = viewport_height * c->image_width / c->image_height;
 
   Vec3 viewport_u = {.x = viewport_width};
