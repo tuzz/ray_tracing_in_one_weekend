@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include "util.c"
 #include "vec3.c"
 #include "point3.c"
@@ -24,8 +23,6 @@
 #include "bvh.c"
 
 int main(void) {
-  srand((unsigned int)time(NULL));
-
   HittableList list = hittable_list_new();
   Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
 
