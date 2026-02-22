@@ -54,21 +54,21 @@ static void camera_initialize(Camera *c) {
 }
 
 static Vec3 camera_sample_square(const Camera *c) {
-  return (Vec3){random_float() - 0.5f, random_float() - 0.5f, 0.0f};
+  return (Vec3){{random_float() - 0.5f, random_float() - 0.5f, 0.0f}};
 }
 
 static Point3 camera_defocus_disk_sample(const Camera *c) {
   Vec3 p = vec3_random_in_unit_disk();
-  Vec3 right_offset = vec3_scale(c->defocus_disk_u, p.x);
-  Vec3 up_offset = vec3_scale(c->defocus_disk_v, p.y);
+  Vec3 right_offset = vec3_scale(c->defocus_disk_u, p.coord.x);
+  Vec3 up_offset = vec3_scale(c->defocus_disk_v, p.coord.y);
   return vec3_add(c->center, vec3_add(right_offset, up_offset));
 }
 
 static Ray3 camera_get_ray(const Camera *c, int i, int j) {
   Vec3 offset = camera_sample_square(c);
 
-  Vec3 pixel_x_offset = vec3_scale(c->pixel_delta_u, i + offset.x);
-  Vec3 pixel_y_offset = vec3_scale(c->pixel_delta_v, j + offset.y);
+  Vec3 pixel_x_offset = vec3_scale(c->pixel_delta_u, i + offset.coord.x);
+  Vec3 pixel_y_offset = vec3_scale(c->pixel_delta_v, j + offset.coord.y);
   Point3 pixel_sample = vec3_add(vec3_add(c->pixel00_loc, pixel_x_offset), pixel_y_offset);
 
   Point3 ray_origin = c->defocus_angle <= 0.0f ? c->center : camera_defocus_disk_sample(c);
@@ -93,7 +93,7 @@ static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, int depth, cons
   }
 
   Vec3 unit_direction = vec3_unit(ray->direction);
-  float alpha = 0.5f * (unit_direction.y + 1.0f);
+  float alpha = 0.5f * (unit_direction.coord.y + 1.0f);
   return vec3_lerp(WHITE, SKY_BLUE, alpha);
 }
 
@@ -105,7 +105,7 @@ static void camera_render(Camera *c, const Hittable *world) {
   for (int j = 0; j < c->image_height; j++) {
     fprintf(stderr, "\rScanlines remaining: %d ", (c->image_height - j));
     for (int i = 0; i < c->image_width; i++) {
-      Color3 pixel_color = {0.0f, 0.0f, 0.0f};
+      Color3 pixel_color = {{0.0f, 0.0f, 0.0f}};
       for (int sample = 0; sample < c->samples_per_pixel; sample++) {
         Ray3 ray = camera_get_ray(c, i, j);
         pixel_color = vec3_add(pixel_color, camera_ray_color(c, &ray, c->max_depth, world));
