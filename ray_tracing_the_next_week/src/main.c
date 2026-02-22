@@ -12,6 +12,7 @@
 #include "color3.c"
 #include "ray3.c"
 #include "hit.c"
+#include "aabb.c"
 #include "sphere.c"
 #include "hittable.c"
 #include "hittable_list.c"
@@ -20,15 +21,16 @@
 #include "dielectric.c"
 #include "material.c"
 #include "camera.c"
+#include "bvh.c"
 
 int main(void) {
   srand((unsigned int)time(NULL));
 
-  HittableList list = {0};
+  HittableList list = hittable_list_new();
   Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
 
   Material ground_material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = {{0.5f, 0.5f, 0.5f}}};
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center.origin = {{0.0f, -1000.0f, 0.0f}}, .radius = 1000.0f, .material = &ground_material}});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, -1000.0f, 0.0f}}}, 1000.0f, &ground_material)});
 
   Material materials[500] = {0};
   int material_count = 0;
@@ -46,17 +48,17 @@ int main(void) {
           Color3 albedo = vec3_mul(vec3_random(), vec3_random());
           *sphere_material = (Material){.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = albedo};
           Ray3 center_ray = (Ray3){.origin = center, .direction.coord.y = random_between(0.0f, 0.5f)};
-          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center = center_ray, .radius = 0.2f, .material = sphere_material}});
+          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new(center_ray, 0.2f, sphere_material)});
         } else if (choose_mat < 0.95f) {
           // metal
           Color3 albedo = vec3_random_between(0.5f, 1.0f);
           float fuzz = random_between(0.0, 0.5f);
           *sphere_material = (Material){.type = MATERIAL_METAL, .u.metal = {.albedo = albedo, .fuzz = fuzz}};
-          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center.origin = center, .radius = 0.2f, .material = sphere_material}});
+          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = center}, 0.2f, sphere_material)});
         } else {
           // glass
           *sphere_material = (Material){.type = MATERIAL_DIELECTRIC, .u.dielectric.refaction_index = 1.5f};
-          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center.origin = center, .radius = 0.2f, .material = sphere_material}});
+          hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = center}, 0.2f, sphere_material)});
         }
       }
     }

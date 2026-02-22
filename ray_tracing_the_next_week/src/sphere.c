@@ -2,7 +2,18 @@ typedef struct {
   Ray3 center;
   float radius;
   Material *material;
+  AABB bbox;
 } Sphere;
+
+static Sphere sphere_new(Ray3 center, float radius, Material *material) {
+  Vec3 rvec = {{radius, radius, radius}};
+  Point3 center1 = ray3_at(center, 0.0f);
+  Point3 center2 = ray3_at(center, 1.0f);
+  AABB box1 = aabb_from_points(vec3_sub(center1, rvec), vec3_add(center1, rvec));
+  AABB box2 = aabb_from_points(vec3_sub(center2, rvec), vec3_add(center2, rvec));
+
+  return (Sphere){.center = center, .radius = radius, .material = material, .bbox = aabb_union(&box1, &box2)};
+}
 
 static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hit) {
   Point3 current_center = ray3_at(s->center, ray->time);

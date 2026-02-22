@@ -1,6 +1,7 @@
 // Forward declare HittableList to break recursive definition.
 typedef struct HittableList HittableList;
 static bool hittable_list_hit(const HittableList *h, const Ray3 *ray, Interval ray_t, Hit *hit);
+static const AABB *hittable_list_bounding_box(const HittableList *h);
 
 typedef enum {
   HITTABLE_SPHERE,
@@ -21,6 +22,17 @@ static bool hittable_hit(const Hittable *h, const Ray3 *ray, Interval ray_t, Hit
       return sphere_hit(&h->u.sphere, ray, ray_t, hit);
     case HITTABLE_LIST:
       return hittable_list_hit(h->u.list, ray, ray_t, hit);
+    default:
+      assert(false && "Unknown HittableType");
+  }
+}
+
+static const AABB *hittable_bounding_box(const Hittable *h) {
+  switch (h->type) {
+    case HITTABLE_SPHERE:
+      return &h->u.sphere.bbox;
+    case HITTABLE_LIST:
+      return hittable_list_bounding_box(h->u.list);
     default:
       assert(false && "Unknown HittableType");
   }
