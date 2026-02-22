@@ -1,6 +1,7 @@
 typedef struct {
   Point3 origin;
   Vec3 direction;
+  float time;
 } Ray3;
 
 static Point3 ray3_at(Ray3 r, float t) {

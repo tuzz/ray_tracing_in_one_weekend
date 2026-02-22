@@ -73,8 +73,9 @@ static Ray3 camera_get_ray(const Camera *c, int i, int j) {
 
   Point3 ray_origin = c->defocus_angle <= 0.0f ? c->center : camera_defocus_disk_sample(c);
   Vec3 ray_direction = vec3_sub(pixel_sample, ray_origin);
+  float ray_time = random_float();
 
-  return (Ray3){.origin = ray_origin, .direction = ray_direction};
+  return (Ray3){.origin = ray_origin, .direction = ray_direction, .time = ray_time};
 }
 
 static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, int depth, const Hittable *world) {

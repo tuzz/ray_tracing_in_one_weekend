@@ -1,11 +1,12 @@
 typedef struct {
-  Point3 center;
+  Ray3 center;
   float radius;
   Material *material;
 } Sphere;
 
 static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hit) {
-  Vec3 oc = vec3_sub(s->center, ray->origin);
+  Point3 current_center = ray3_at(s->center, ray->time);
+  Vec3 oc = vec3_sub(current_center, ray->origin);
   float a = vec3_length_squared(ray->direction);
   float h = vec3_dot(ray->direction, oc);
   float c = vec3_length_squared(oc) - s->radius * s->radius;
@@ -22,7 +23,7 @@ static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hi
   }
 
   Point3 intersection = ray3_at(*ray, root);
-  Vec3 normal = vec3_sub(intersection, s->center);
+  Vec3 normal = vec3_sub(intersection, current_center);
   Vec3 unit_normal = vec3_scale(normal, 1.0f / s->radius);
 
   hit->t = root;

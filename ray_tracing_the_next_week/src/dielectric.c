@@ -25,6 +25,6 @@ static bool dielectric_scatter(const Dielectric *d, const Ray3 *ray, const Hit *
     direction = vec3_refract(unit_direction, hit->normal, ri);
   }
 
-  *scattered = (Ray3){.origin = hit->p, .direction = direction};
+  *scattered = (Ray3){.origin = hit->p, .direction = direction, .time = ray->time};
   return true;
 }
