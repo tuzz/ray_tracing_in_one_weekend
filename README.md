@@ -4,13 +4,14 @@ My C99 implementation of [Ray Tracing in One Weekend](https://raytracing.github.
 by Peter Shirley, Trevor David Black, Steve Hollasch. My implementation uses
 tagged unions rather than polymorphism and shared pointers.
 
-![Ray traced image](image.jpg)
+![Ray traced image](ray_tracing_in_one_weekend/image.jpg)
 
 ## Usage
 
 You can render the scene above as follows:
 
 ```sh
+cd ray_tracing_in_one_weekend
 ./scripts/build_release
 ./build/release/main > image.ppm
 open image.ppm
