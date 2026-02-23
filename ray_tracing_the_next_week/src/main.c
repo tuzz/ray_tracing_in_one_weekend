@@ -25,7 +25,7 @@
 #include "camera.c"
 #include "bvh.c"
 
-int main(void) {
+static void bouncing_spheres(void) {
   HittableList list = hittable_list_new();
 
   Texture dark = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.2f, 0.3f, 0.1f}}};
@@ -100,4 +100,45 @@ int main(void) {
   camera.focus_dist = 10.0f;
 
   camera_render(&camera, world);
+}
+
+static void checkered_spheres(void) {
+  HittableList list = hittable_list_new();
+  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
+
+  Texture dark = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.2f, 0.3f, 0.1f}}};
+  Texture light = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.9f, 0.9f, 0.9f}}};
+  CheckerTexture check = {.inv_scale = 1.0f / 0.32f, .even = &dark, .odd = &light};
+
+  Texture checker = {.type = TEXTURE_CHECKER, .u.checker_texture = &check };
+  Material material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &checker};
+
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, -10.0f, 0.0f}}}, 10.0f, &material)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 10.0f, 0.0f}}}, 10.0f, &material)});
+
+  Camera camera = {0};
+  camera.aspect_ratio = 16.0f / 9.0f;
+  camera.image_width = 400;
+  camera.samples_per_pixel = 100;
+  camera.max_depth = 50;
+
+  camera.vfov = 20.0f;
+  camera.lookfrom = (Point3){{13.0f, 2.0f, 3.0f}};
+  camera.lookat = (Point3){{0.0f, 0.0f, 0.0f}};
+  camera.vup = (Point3){{0.0f, 1.0f, 0.0f}};
+
+  camera.defocus_angle = 0.0f;
+  camera.focus_dist = 10.0f;
+
+  camera_render(&camera, &world);
+}
+
+int main(void) {
+  int scene_to_render = 2;
+
+  switch (scene_to_render) {
+    case 1: bouncing_spheres();  break;
+    case 2: checkered_spheres(); break;
+    default:                     break;
+  }
 }
