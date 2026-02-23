@@ -3,9 +3,8 @@ typedef union {
   struct { Interval x, y, z; } interval;
 } AABB;
 
-static AABB aabb_empty(void) {
-  return (AABB){{INTERVAL_EMPTY, INTERVAL_EMPTY, INTERVAL_EMPTY}};
-}
+static const AABB AABB_EMPTY = {{INTERVAL_EMPTY, INTERVAL_EMPTY, INTERVAL_EMPTY}};
+static const AABB AABB_UNIVERSE = {{INTERVAL_UNIVERSE, INTERVAL_UNIVERSE, INTERVAL_UNIVERSE}};
 
 static AABB aabb_from_points(Point3 a, Point3 b) {
   return (AABB){{
@@ -43,4 +42,16 @@ static bool aabb_hit(const AABB *aabb, const Ray3 *ray, Interval ray_t) {
   }
 
   return true;
+}
+
+static int aabb_longest_axis(const AABB *aabb) {
+  float x_size = interval_size(aabb->interval.x);
+  float y_size = interval_size(aabb->interval.y);
+  float z_size = interval_size(aabb->interval.z);
+
+  if (x_size > y_size) {
+    return x_size > z_size ? 0 : 2;
+  } else {
+    return y_size > z_size ? 1 : 2;
+  }
 }

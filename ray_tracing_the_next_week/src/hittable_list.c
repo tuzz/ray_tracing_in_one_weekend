@@ -7,7 +7,7 @@ struct HittableList {
 };
 
 static HittableList hittable_list_new(void) {
-  return (HittableList){.bbox = aabb_empty()};
+  return (HittableList){.bbox = AABB_EMPTY};
 }
 
 static void hittable_list_clear(HittableList *h) {

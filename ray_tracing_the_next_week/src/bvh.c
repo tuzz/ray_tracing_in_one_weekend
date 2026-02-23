@@ -41,7 +41,14 @@ static Hittable *bvh_node(BVH *bvh, Hittable *hittables, size_t start, size_t en
     node->left = &hittables[start];
     node->right = &hittables[start + 1];
   } else {
-    int axis = random_int(0, 2);
+    AABB bbox = AABB_EMPTY;
+
+    for (size_t i = start; i < end; i++) {
+      AABB hittable_box = hittable_bounding_box(&hittables[i]);
+      bbox = aabb_union(&bbox, &hittable_box);
+    }
+
+    int axis = aabb_longest_axis(&bbox);
     qsort(hittables + start, object_span, sizeof(Hittable), axis == 0 ? bvh_compare_x : axis == 1 ? bvh_compare_y : bvh_compare_z);
 
     size_t mid = start + object_span / 2;
