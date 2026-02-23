@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_FAILURE_USERMSG
+#include "../external/stb_image.h"
 #include <assert.h>
 #include <float.h>
 #include <math.h>
@@ -13,6 +16,8 @@
 #include "hit.c"
 #include "aabb.c"
 #include "sphere.c"
+#include "image.c"
+#include "image_texture.c"
 #include "solid_color.c"
 #include "texture.c"
 #include "checker_texture.c"
@@ -133,12 +138,38 @@ static void checkered_spheres(void) {
   camera_render(&camera, &world);
 }
 
+static void earth(void) {
+  Image image = image_load("images/earthmap.jpg");
+  ImageTexture image_texture = {.image = &image};
+  Texture texture = {.type = TEXTURE_IMAGE, .u.image_texture = &image_texture};
+  Material surface = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &texture};
+  Hittable globe = {.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 0.0f, 0.0f}}}, 2.0f, &surface)};
+
+  Camera camera = {0};
+  camera.aspect_ratio = 16.0f / 9.0f;
+  camera.image_width = 400;
+  camera.samples_per_pixel = 100;
+  camera.max_depth = 50;
+
+  camera.vfov = 20.0f;
+  camera.lookfrom = (Point3){{0.0f, 0.0f, 12.0f}};
+  camera.lookat = (Point3){{0.0f, 0.0f, 0.0f}};
+  camera.vup = (Point3){{0.0f, 1.0f, 0.0f}};
+
+  camera.defocus_angle = 0.0f;
+  camera.focus_dist = 10.0f;
+
+  camera_render(&camera, &globe);
+  image_free(&image);
+}
+
 int main(void) {
-  int scene_to_render = 2;
+  int scene_to_render = 3;
 
   switch (scene_to_render) {
     case 1: bouncing_spheres();  break;
     case 2: checkered_spheres(); break;
+    case 3: earth();             break;
     default:                     break;
   }
 }

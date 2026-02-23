@@ -9,6 +9,7 @@ clang src/main.c \
   -std=c99 -g -Weverything -Werror -pedantic-errors -fsanitize=address,undefined \
   -Wno-declaration-after-statement -Wno-padded -Wno-covered-switch-default \
   -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable \
+  -Wno-cast-align -Wno-sign-conversion -Wno-disabled-macro-expansion -Wno-double-promotion -Wno-cast-qual -Wno-switch-default -Wno-implicit-int-conversion \
   -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk \
   -Wl,-dead_strip -Wl,-map,build/debug/main.map \
   -o build/debug/main

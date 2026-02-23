@@ -15,6 +15,14 @@ static Sphere sphere_new(Ray3 center, float radius, Material *material) {
   return (Sphere){.center = center, .radius = radius, .material = material, .bbox = aabb_union(&box1, &box2)};
 }
 
+static void sphere_get_uv(Point3 p, float *u, float *v) {
+  float phi = atan2f(-p.coord.z, p.coord.x) + PI;
+  float theta = acosf(-p.coord.y);
+
+  *u = phi / (2.0f * PI);
+  *v = theta / PI;
+}
+
 static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hit) {
   Point3 current_center = ray3_at(s->center, ray->time);
   Vec3 oc = vec3_sub(current_center, ray->origin);
@@ -40,6 +48,7 @@ static bool sphere_hit(const Sphere *s, const Ray3 *ray, Interval ray_t, Hit *hi
   hit->t = root;
   hit->p = intersection;
   hit_set_face_normal(hit, ray, unit_normal);
+  sphere_get_uv(unit_normal, &hit->u, &hit->v);
   hit->material = s->material;
 
   return true;
