@@ -2,8 +2,8 @@ typedef struct {
   float min, max;
 } Interval;
 
-static const Interval INTERVAL_EMPTY = {FLT_MAX, FLT_MIN};
-static const Interval INTERVAL_UNIVERSE = {FLT_MIN, FLT_MAX};
+static const Interval INTERVAL_EMPTY = {FLT_MAX, -FLT_MAX};
+static const Interval INTERVAL_UNIVERSE = {-FLT_MAX, FLT_MAX};
 
 static float interval_size(Interval i) {
   return i.max - i.min;

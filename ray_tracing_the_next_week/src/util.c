@@ -12,6 +12,10 @@ static float random_between(float min, float max) {
   return min + (max - min) * random_float();
 }
 
+static int random_int(int min, int max) {
+  return (int)(random_between(min, max + 1));
+}
+
 static float linear_to_gamma(float linear_component) {
   return linear_component > 0 ? sqrtf(linear_component) : 0.0f;
 }

@@ -20,8 +20,10 @@ static void hittable_list_add(HittableList *h, Hittable hittable) {
     exit(EXIT_FAILURE);
   }
 
+  AABB bbox = hittable_bounding_box(&hittable);
+
   h->items[h->length++] = hittable;
-  h->bbox = aabb_union(&h->bbox, hittable_bounding_box(&hittable));
+  h->bbox = aabb_union(&h->bbox, &bbox);
 }
 
 static bool hittable_list_hit(const HittableList *h, const Ray3 *ray, Interval ray_t, Hit *hit) {
@@ -40,6 +42,6 @@ static bool hittable_list_hit(const HittableList *h, const Ray3 *ray, Interval r
   return hit_anything;
 }
 
-static const AABB *hittable_list_bounding_box(const HittableList *h) {
-  return &h->bbox;
+static AABB hittable_list_bounding_box(const HittableList *h) {
+  return h->bbox;
 }

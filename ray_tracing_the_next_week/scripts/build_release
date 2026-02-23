@@ -8,7 +8,7 @@ mkdir -p build/release
 clang src/main.c \
   -std=c99 -O3 -ffast-math -march=native -flto -Weverything -Werror -pedantic-errors \
   -Wno-declaration-after-statement -Wno-padded -Wno-covered-switch-default \
-  -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function \
+  -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable \
   -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk \
   -Wl,-dead_strip -Wl,-map,build/release/main.map \
   -o build/release/main

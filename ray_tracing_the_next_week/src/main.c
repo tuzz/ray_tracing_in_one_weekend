@@ -24,7 +24,6 @@
 
 int main(void) {
   HittableList list = hittable_list_new();
-  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
 
   Material ground_material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = {{0.5f, 0.5f, 0.5f}}};
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, -1000.0f, 0.0f}}}, 1000.0f, &ground_material)});
@@ -62,13 +61,16 @@ int main(void) {
   }
 
   Material material1 = {.type = MATERIAL_DIELECTRIC, .u.dielectric.refaction_index = 1.5f};
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center.origin = {{0.0f, 1.0f, 0.0f}}, .radius = 1.0f, .material = &material1}});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 1.0f, 0.0f}}}, 1.0f, &material1)});
 
   Material material2 = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = {{0.4f, 0.2f, 0.1f}}};
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center.origin = {{-4.0f, 1.0f, 0.0f}}, .radius = 1.0f, .material = &material2}});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{-4.0f, 1.0f, 0.0f}}}, 1.0f, &material2)});
 
   Material material3 = {.type = MATERIAL_METAL, .u.metal = {.albedo = {{0.7f, 0.6f, 0.5f}}, .fuzz = 0.0f}};
-  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = {.center.origin = {{4.0f, 1.0f, 0.0f}}, .radius = 1.0f, .material = &material3}});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{4.0f, 1.0f, 0.0f}}}, 1.0f, &material3)});
+
+  BVH bvh = {0};
+  Hittable *world = bvh_node(&bvh, list.items, 0, list.length);
 
   Camera camera = {0};
   camera.aspect_ratio = 16.0f / 9.0f;
@@ -84,5 +86,5 @@ int main(void) {
   camera.defocus_angle = 0.6f;
   camera.focus_dist = 10.0f;
 
-  camera_render(&camera, &world);
+  camera_render(&camera, world);
 }
