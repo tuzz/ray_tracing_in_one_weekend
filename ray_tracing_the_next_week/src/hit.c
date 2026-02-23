@@ -5,6 +5,8 @@ typedef struct {
   Vec3 normal;
   Material *material;
   float t;
+  float u;
+  float v;
   bool front_face;
 } Hit;
 

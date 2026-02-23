@@ -13,6 +13,9 @@
 #include "hit.c"
 #include "aabb.c"
 #include "sphere.c"
+#include "solid_color.c"
+#include "texture.c"
+#include "checker_texture.c"
 #include "hittable.c"
 #include "hittable_list.c"
 #include "lambertian.c"
@@ -25,8 +28,16 @@
 int main(void) {
   HittableList list = hittable_list_new();
 
-  Material ground_material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = {{0.5f, 0.5f, 0.5f}}};
+  Texture dark = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.2f, 0.3f, 0.1f}}};
+  Texture light = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.9f, 0.9f, 0.9f}}};
+  CheckerTexture check = {.inv_scale = 1.0f / 0.32f, .even = &dark, .odd = &light};
+  Texture checker = {.type = TEXTURE_CHECKER, .u.checker_texture = &check };
+
+  Material ground_material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &checker};
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, -1000.0f, 0.0f}}}, 1000.0f, &ground_material)});
+
+  Texture textures[500] = {0};
+  int texture_count = 0;
 
   Material materials[500] = {0};
   int material_count = 0;
@@ -41,8 +52,9 @@ int main(void) {
 
         if (choose_mat < 0.8f) {
           // diffuse
-          Color3 albedo = vec3_mul(vec3_random(), vec3_random());
-          *sphere_material = (Material){.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = albedo};
+          Texture *sphere_texture = &textures[texture_count++];
+          *sphere_texture = (Texture){.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = vec3_mul(vec3_random(), vec3_random()) };
+          *sphere_material = (Material){.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = sphere_texture};
           Ray3 center_ray = (Ray3){.origin = center, .direction.coord.y = random_between(0.0f, 0.5f)};
           hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new(center_ray, 0.2f, sphere_material)});
         } else if (choose_mat < 0.95f) {
@@ -63,7 +75,8 @@ int main(void) {
   Material material1 = {.type = MATERIAL_DIELECTRIC, .u.dielectric.refaction_index = 1.5f};
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 1.0f, 0.0f}}}, 1.0f, &material1)});
 
-  Material material2 = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.albedo = {{0.4f, 0.2f, 0.1f}}};
+  Texture tex = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.4f, 0.2f, 0.1f}}};
+  Material material2 = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &tex};
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{-4.0f, 1.0f, 0.0f}}}, 1.0f, &material2)});
 
   Material material3 = {.type = MATERIAL_METAL, .u.metal = {.albedo = {{0.7f, 0.6f, 0.5f}}, .fuzz = 0.0f}};
