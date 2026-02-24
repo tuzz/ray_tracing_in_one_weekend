@@ -1,7 +1,7 @@
 #define POINT_COUNT 256
 
 typedef struct {
-  float randfloat[POINT_COUNT];
+  Vec3 randvec[POINT_COUNT];
   int perm_x[POINT_COUNT];
   int perm_y[POINT_COUNT];
   int perm_z[POINT_COUNT];
@@ -11,7 +11,7 @@ static Perlin perlin_generate(void) {
   Perlin perlin = {0};
 
   for (int i = 0; i < POINT_COUNT; i++) {
-    perlin.randfloat[i] = random_float();
+    perlin.randvec[i] = vec3_unit(vec3_random_between(-1.0f, 1.0f));
     perlin.perm_x[i] = i;
     perlin.perm_y[i] = i;
     perlin.perm_z[i] = i;
@@ -24,17 +24,22 @@ static Perlin perlin_generate(void) {
   return perlin;
 }
 
-static float perlin_trilinear_interp(float c[2][2][2], float u, float v, float w) {
+static float perlin_interp(const Vec3 c[2][2][2], float u, float v, float w) {
+  float uu = u * u * (3 - 2 * u);
+  float vv = v * v * (3 - 2 * v);
+  float ww = w * w * (3 - 2 * w);
   float accum = 0.0f;
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j < 2; j++)
-      for (int k = 0; k < 2; k++)
+      for (int k = 0; k < 2; k++) {
+        Vec3 weight_v = {{u - i, v - j, w - k}};
         accum +=
-          (i * u + (1 - i) * (1 - u)) *
-          (j * v + (1 - j) * (1 - v)) *
-          (k * w + (1 - k) * (1 - w)) *
-          c[i][j][k];
+          (i * uu + (1 - i) * (1 - uu)) *
+          (j * vv + (1 - j) * (1 - vv)) *
+          (k * ww + (1 - k) * (1 - ww)) *
+          vec3_dot(c[i][j][k], weight_v);
+      }
 
   return accum;
 }
@@ -44,24 +49,20 @@ static float perlin_noise(Perlin *p, Point3 point) {
   float v = point.coord.y - floorf(point.coord.y);
   float w = point.coord.z - floorf(point.coord.z);
 
-  u = u * u * (3 - 2 * u);
-  v = v * v * (3 - 2 * v);
-  w = w * w * (3 - 2 * w);
-
   int i = (int)(floorf(point.coord.x));
   int j = (int)(floorf(point.coord.y));
   int k = (int)(floorf(point.coord.z));
 
-  float c[2][2][2];
+  Vec3 c[2][2][2];
 
   for (int di = 0; di < 2; di++)
     for (int dj = 0; dj < 2; dj++)
       for (int dk = 0; dk < 2; dk++)
-        c[di][dj][dk] = p->randfloat[
-          p->perm_x[(i+di) & 255] ^
-          p->perm_y[(j+dj) & 255] ^
-          p->perm_z[(k+dk) & 255]
+        c[di][dj][dk] = p->randvec[
+          p->perm_x[(i + di) & 255] ^
+          p->perm_y[(j + dj) & 255] ^
+          p->perm_z[(k + dk) & 255]
         ];
 
-  return perlin_trilinear_interp(c, u, v, w);
+  return perlin_interp(c, u, v, w);
 }
