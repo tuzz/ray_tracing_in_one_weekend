@@ -66,3 +66,17 @@ static float perlin_noise(Perlin *p, Point3 point) {
 
   return perlin_interp(c, u, v, w);
 }
+
+static float perlin_turbulence(Perlin *p, Point3 point, int depth) {
+  float accum = 0.0f;
+  Point3 temp_p = point;
+  float weight = 1.0f;
+
+  for (int i = 0; i < depth; i++) {
+    accum += weight * perlin_noise(p, temp_p);
+    weight *= 0.5f;
+    temp_p = vec3_scale(temp_p, 2.0f);
+  }
+
+  return fabsf(accum);
+}
