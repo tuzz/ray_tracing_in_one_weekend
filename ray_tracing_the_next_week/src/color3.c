@@ -1,6 +1,7 @@
 typedef Vec3 Color3;
 
 static const Color3 BLACK = {{0.0f, 0.0f, 0.0f}};
+static const Color3 GREY = {{0.5f, 0.5f, 0.5f}};
 static const Color3 WHITE = {{1.0f, 1.0f, 1.0f}};
 static const Color3 SKY_BLUE = {{0.5f, 0.7f, 1.0f}};
 
