@@ -44,6 +44,10 @@ static float perlin_noise(Perlin *p, Point3 point) {
   float v = point.coord.y - floorf(point.coord.y);
   float w = point.coord.z - floorf(point.coord.z);
 
+  u = u * u * (3 - 2 * u);
+  v = v * v * (3 - 2 * v);
+  w = w * w * (3 - 2 * w);
+
   int i = (int)(floorf(point.coord.x));
   int j = (int)(floorf(point.coord.y));
   int k = (int)(floorf(point.coord.z));
