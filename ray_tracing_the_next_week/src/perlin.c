@@ -24,10 +24,40 @@ static Perlin perlin_generate(void) {
   return perlin;
 }
 
-static float perlin_noise(Perlin *p, Point3 point) {
-  int i = positive_mod((int)(4 * point.coord.x), POINT_COUNT - 1);
-  int j = positive_mod((int)(4 * point.coord.y), POINT_COUNT - 1);
-  int k = positive_mod((int)(4 * point.coord.z), POINT_COUNT - 1);
+static float perlin_trilinear_interp(float c[2][2][2], float u, float v, float w) {
+  float accum = 0.0f;
 
-  return p->randfloat[p->perm_x[i] ^ p->perm_y[j] ^ p->perm_z[k]];
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j < 2; j++)
+      for (int k = 0; k < 2; k++)
+        accum +=
+          (i * u + (1 - i) * (1 - u)) *
+          (j * v + (1 - j) * (1 - v)) *
+          (k * w + (1 - k) * (1 - w)) *
+          c[i][j][k];
+
+  return accum;
+}
+
+static float perlin_noise(Perlin *p, Point3 point) {
+  float u = point.coord.x - floorf(point.coord.x);
+  float v = point.coord.y - floorf(point.coord.y);
+  float w = point.coord.z - floorf(point.coord.z);
+
+  int i = (int)(floorf(point.coord.x));
+  int j = (int)(floorf(point.coord.y));
+  int k = (int)(floorf(point.coord.z));
+
+  float c[2][2][2];
+
+  for (int di = 0; di < 2; di++)
+    for (int dj = 0; dj < 2; dj++)
+      for (int dk = 0; dk < 2; dk++)
+        c[di][dj][dk] = p->randfloat[
+          p->perm_x[(i+di) & 255] ^
+          p->perm_y[(j+dj) & 255] ^
+          p->perm_z[(k+dk) & 255]
+        ];
+
+  return perlin_trilinear_interp(c, u, v, w);
 }
