@@ -29,6 +29,7 @@
 #include "lambertian.c"
 #include "metal.c"
 #include "dielectric.c"
+#include "diffuse_light.c"
 #include "material.c"
 #include "camera.c"
 #include "bvh.c"
@@ -98,6 +99,7 @@ static void bouncing_spheres(void) {
   camera.image_width = 400;
   camera.samples_per_pixel = 100;
   camera.max_depth = 50;
+  camera.background = (Color3){{0.7f, 0.8f, 1.0f}};
 
   camera.vfov = 20.0f;
   camera.lookfrom = (Point3){{13.0f, 2.0f, 3.0f}};
@@ -129,6 +131,7 @@ static void checkered_spheres(void) {
   camera.image_width = 400;
   camera.samples_per_pixel = 100;
   camera.max_depth = 50;
+  camera.background = (Color3){{0.7f, 0.8f, 1.0f}};
 
   camera.vfov = 20.0f;
   camera.lookfrom = (Point3){{13.0f, 2.0f, 3.0f}};
@@ -152,6 +155,7 @@ static void earth(void) {
   camera.image_width = 400;
   camera.samples_per_pixel = 100;
   camera.max_depth = 50;
+  camera.background = (Color3){{0.7f, 0.8f, 1.0f}};
 
   camera.vfov = 20.0f;
   camera.lookfrom = (Point3){{0.0f, 0.0f, 12.0f}};
@@ -180,6 +184,7 @@ static void perlin_spheres(void) {
   camera.image_width = 400;
   camera.samples_per_pixel = 100;
   camera.max_depth = 50;
+  camera.background = (Color3){{0.7f, 0.8f, 1.0f}};
 
   camera.vfov = 20.0f;
   camera.lookfrom = (Point3){{13.0f, 2.0f, 3.0f}};
@@ -219,6 +224,7 @@ static void quads(void) {
   camera.image_width = 400;
   camera.samples_per_pixel = 100;
   camera.max_depth = 50;
+  camera.background = (Color3){{0.7f, 0.8f, 1.0f}};
 
   camera.vfov = 80.0f;
   camera.lookfrom = (Point3){{0.0f, 0.0f, 9.0f}};
@@ -231,8 +237,41 @@ static void quads(void) {
   camera_render(&camera, &world);
 }
 
+static void simple_light(void) {
+  HittableList list = hittable_list_new();
+  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
+
+  Texture pertext = {.type = TEXTURE_NOISE, .u.noise_texture = {.perlin = perlin_generate(), .scale = 4.0f}};
+  Material material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &pertext};
+
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, -1000.0f, 0.0f}}}, 1000.0f, &material)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 2.0f, 0.0f}}}, 2.0f, &material)});
+
+  Texture very_white = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{4.0f, 4.0f, 4.0f}}};
+  Material difflight = {.type = MATERIAL_DIFFUSE_LIGHT, .u.diffuse_light.tex = &very_white};
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 7.0f, 0.0f}}}, 2.0f, &difflight)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{3.0f, 1.0f, -2.0f}}, (Vec3){{2.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 2.0f, 0.0f}}, &difflight)});
+
+  Camera camera = {0};
+  camera.aspect_ratio = 16.0f / 9.0f;
+  camera.image_width = 400;
+  camera.samples_per_pixel = 100;
+  camera.max_depth = 50;
+  camera.background = BLACK;
+
+  camera.vfov = 20.0f;
+  camera.lookfrom = (Point3){{26.0f, 3.0f, 6.0f}};
+  camera.lookat = (Point3){{0.0f, 2.0f, 0.0f}};
+  camera.vup = (Point3){{0.0f, 1.0f, 0.0f}};
+
+  camera.defocus_angle = 0.0f;
+  camera.focus_dist = 10.0f;
+
+  camera_render(&camera, &world);
+}
+
 int main(void) {
-  int scene_to_render = 5;
+  int scene_to_render = 6;
 
   switch (scene_to_render) {
     case 1: bouncing_spheres();  break;
@@ -240,6 +279,7 @@ int main(void) {
     case 3: earth();             break;
     case 4: perlin_spheres();    break;
     case 5: quads();             break;
+    case 6: simple_light();      break;
     default:                     break;
   }
 }

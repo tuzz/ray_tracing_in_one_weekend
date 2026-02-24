@@ -3,6 +3,7 @@ typedef struct {
   int image_width;
   int samples_per_pixel;
   int max_depth;
+  Color3 background;
   float vfov;
   Point3 lookfrom;
   Point3 lookat;
@@ -82,19 +83,18 @@ static Color3 camera_ray_color(const Camera *c, const Ray3 *ray, int depth, cons
   if (depth <= 0) return BLACK;
 
   Hit hit;
+  if (!hittable_hit(world, ray, (Interval){0.001f, FLT_MAX}, &hit))
+    return c->background;
 
-  if (hittable_hit(world, ray, (Interval){0.001f, FLT_MAX}, &hit)) {
-    Ray3 scattered;
-    Color3 attenuation;
-    if (material_scatter(hit.material, ray, &hit, &attenuation, &scattered)) {
-      return vec3_mul(attenuation, camera_ray_color(c, &scattered, depth - 1, world));
-    }
-    return BLACK;
-  }
+  Ray3 scattered;
+  Color3 attenuation;
+  Color3 color_from_emission = material_emitted(hit.material, hit.u, hit.v, hit.p);
 
-  Vec3 unit_direction = vec3_unit(ray->direction);
-  float alpha = 0.5f * (unit_direction.coord.y + 1.0f);
-  return vec3_lerp(WHITE, SKY_BLUE, alpha);
+  if (!material_scatter(hit.material, ray, &hit, &attenuation, &scattered))
+    return color_from_emission;
+
+  Color3 color_from_scatter = vec3_mul(attenuation, camera_ray_color(c, &scattered, depth - 1, world));
+  return vec3_add(color_from_emission, color_from_scatter);
 }
 
 static void camera_render(Camera *c, const Hittable *world) {
