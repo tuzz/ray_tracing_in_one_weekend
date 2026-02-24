@@ -168,7 +168,7 @@ static void perlin_spheres(void) {
   HittableList list = hittable_list_new();
   Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
 
-  Texture pertext = {.type = TEXTURE_NOISE, .u.noise_texture.perlin = perlin_generate()};
+  Texture pertext = {.type = TEXTURE_NOISE, .u.noise_texture = {.perlin = perlin_generate(), .scale = 4.0f}};
   Material material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &pertext};
 
   hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, -1000.0f, 0.0f}}}, 1000.0f, &material)});
