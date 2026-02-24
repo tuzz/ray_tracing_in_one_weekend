@@ -1,5 +1,6 @@
 typedef struct {
-  float min, max;
+  float min;
+  float max;
 } Interval;
 
 static const Interval INTERVAL_EMPTY = {FLT_MAX, -FLT_MAX};
@@ -7,6 +8,11 @@ static const Interval INTERVAL_UNIVERSE = {-FLT_MAX, FLT_MAX};
 
 static Interval interval_from(float a, float b) {
   return a <= b ? (Interval){a, b} : (Interval){b, a};
+}
+
+static Interval interval_expand(Interval i, float delta) {
+  float padding = delta / 2.0f;
+  return (Interval){i.min - padding, i.max + padding};
 }
 
 static Interval interval_union(Interval a, Interval b) {

@@ -4,6 +4,6 @@ typedef struct {
   float time;
 } Ray3;
 
-static Point3 ray3_at(Ray3 r, float t) {
-  return vec3_add(r.origin, vec3_scale(r.direction, t));
+static Point3 ray3_at(const Ray3 *r, float t) {
+  return vec3_add(r->origin, vec3_scale(r->direction, t));
 }

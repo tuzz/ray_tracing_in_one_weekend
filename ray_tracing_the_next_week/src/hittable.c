@@ -9,6 +9,7 @@ static AABB bvh_node_bounding_box(const BVHNode *n);
 
 typedef enum {
   HITTABLE_SPHERE,
+  HITTABLE_QUAD,
   HITTABLE_LIST,
   HITTABLE_BVH_NODE,
 } HittableType;
@@ -17,6 +18,7 @@ typedef struct Hittable {
   HittableType type;
   union {
     Sphere sphere;
+    Quad quad;
     HittableList *list;
     BVHNode *node;
   } u;
@@ -26,6 +28,8 @@ static bool hittable_hit(const Hittable *h, const Ray3 *ray, Interval ray_t, Hit
   switch (h->type) {
     case HITTABLE_SPHERE:
       return sphere_hit(&h->u.sphere, ray, ray_t, hit);
+    case HITTABLE_QUAD:
+      return quad_hit(&h->u.quad, ray, ray_t, hit);
     case HITTABLE_LIST:
       return hittable_list_hit(h->u.list, ray, ray_t, hit);
     case HITTABLE_BVH_NODE:
@@ -39,6 +43,8 @@ static AABB hittable_bounding_box(const Hittable *h) {
   switch (h->type) {
     case HITTABLE_SPHERE:
       return h->u.sphere.bbox;
+    case HITTABLE_QUAD:
+      return h->u.quad.bbox;
     case HITTABLE_LIST:
       return hittable_list_bounding_box(h->u.list);
     case HITTABLE_BVH_NODE:

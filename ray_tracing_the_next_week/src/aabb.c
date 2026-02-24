@@ -7,11 +7,16 @@ static const AABB AABB_EMPTY = {{INTERVAL_EMPTY, INTERVAL_EMPTY, INTERVAL_EMPTY}
 static const AABB AABB_UNIVERSE = {{INTERVAL_UNIVERSE, INTERVAL_UNIVERSE, INTERVAL_UNIVERSE}};
 
 static AABB aabb_from_points(Point3 a, Point3 b) {
-  return (AABB){{
-    interval_from(a.coord.x, b.coord.x),
-    interval_from(a.coord.y, b.coord.y),
-    interval_from(a.coord.z, b.coord.z),
-  }};
+  Interval x = interval_from(a.coord.x, b.coord.x);
+  Interval y = interval_from(a.coord.y, b.coord.y);
+  Interval z = interval_from(a.coord.z, b.coord.z);
+
+  float delta = 0.0001f;
+  if (interval_size(x) < delta) x = interval_expand(x, delta);
+  if (interval_size(y) < delta) x = interval_expand(y, delta);
+  if (interval_size(z) < delta) x = interval_expand(z, delta);
+
+  return (AABB){{x, y, z}};
 }
 
 static AABB aabb_union(const AABB *a, const AABB *b) {

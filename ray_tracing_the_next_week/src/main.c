@@ -16,6 +16,7 @@
 #include "hit.c"
 #include "aabb.c"
 #include "sphere.c"
+#include "quad.c"
 #include "image.c"
 #include "image_texture.c"
 #include "solid_color.c"
@@ -191,14 +192,54 @@ static void perlin_spheres(void) {
   camera_render(&camera, &world);
 }
 
+static void quads(void) {
+  HittableList list = hittable_list_new();
+  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
+
+  Texture red = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{1.0f, 0.2f, 0.2f}}};
+  Texture green = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.2f, 1.0f, 0.2f}}};
+  Texture blue = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.2f, 0.2f, 1.0f}}};
+  Texture orange = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{1.0f, 0.5f, 0.0f}}};
+  Texture teal = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.2f, 0.8f, 0.8f}}};
+
+  Material left_red = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &red};
+  Material back_green = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &green};
+  Material right_blue = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &blue};
+  Material upper_orange = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &orange};
+  Material lower_teal = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &teal};
+
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{-3.0f, -2.0f, 5.0f}}, (Vec3){{0.0f, 0.0f, -4.0f}}, (Vec3){{0.0f, 4.0f, 0.0f}}, &left_red)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{-2.0f, -2.0f, 0.0f}}, (Vec3){{4.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 4.0f, 0.0f}}, &back_green)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{3.0f, -2.0f, 1.0f}}, (Vec3){{0.0f, 0.0f, 4.0f}}, (Vec3){{0.0f, 4.0f, 0.0f}}, &right_blue)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{-2.0f, 3.0f, 1.0f}}, (Vec3){{4.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, 4.0f}}, &upper_orange)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{-2.0f, -3.0f, 5.0f}}, (Vec3){{4.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, -4.0f}}, &lower_teal)});
+
+  Camera camera = {0};
+  camera.aspect_ratio = 1.0f;
+  camera.image_width = 400;
+  camera.samples_per_pixel = 100;
+  camera.max_depth = 50;
+
+  camera.vfov = 80.0f;
+  camera.lookfrom = (Point3){{0.0f, 0.0f, 9.0f}};
+  camera.lookat = (Point3){{0.0f, 0.0f, 0.0f}};
+  camera.vup = (Point3){{0.0f, 1.0f, 0.0f}};
+
+  camera.defocus_angle = 0.0f;
+  camera.focus_dist = 10.0f;
+
+  camera_render(&camera, &world);
+}
+
 int main(void) {
-  int scene_to_render = 4;
+  int scene_to_render = 5;
 
   switch (scene_to_render) {
     case 1: bouncing_spheres();  break;
     case 2: checkered_spheres(); break;
     case 3: earth();             break;
     case 4: perlin_spheres();    break;
+    case 5: quads();             break;
     default:                     break;
   }
 }
