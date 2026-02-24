@@ -19,6 +19,8 @@
 #include "image.c"
 #include "image_texture.c"
 #include "solid_color.c"
+#include "perlin.c"
+#include "noise_texture.c"
 #include "texture.c"
 #include "checker_texture.c"
 #include "hittable.c"
@@ -140,8 +142,7 @@ static void checkered_spheres(void) {
 
 static void earth(void) {
   Image image = image_load("images/earthmap.jpg");
-  ImageTexture image_texture = {.image = &image};
-  Texture texture = {.type = TEXTURE_IMAGE, .u.image_texture = &image_texture};
+  Texture texture = {.type = TEXTURE_IMAGE, .u.image_texture = {.image = &image}};
   Material surface = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &texture};
   Hittable globe = {.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 0.0f, 0.0f}}}, 2.0f, &surface)};
 
@@ -163,13 +164,41 @@ static void earth(void) {
   image_free(&image);
 }
 
+static void perlin_spheres(void) {
+  HittableList list = hittable_list_new();
+  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
+
+  Texture pertext = {.type = TEXTURE_NOISE, .u.noise_texture.perlin = perlin_generate()};
+  Material material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &pertext};
+
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, -1000.0f, 0.0f}}}, 1000.0f, &material)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 2.0f, 0.0f}}}, 2.0f, &material)});
+
+  Camera camera = {0};
+  camera.aspect_ratio = 16.0f / 9.0f;
+  camera.image_width = 400;
+  camera.samples_per_pixel = 100;
+  camera.max_depth = 50;
+
+  camera.vfov = 20.0f;
+  camera.lookfrom = (Point3){{13.0f, 2.0f, 3.0f}};
+  camera.lookat = (Point3){{0.0f, 0.0f, 0.0f}};
+  camera.vup = (Point3){{0.0f, 1.0f, 0.0f}};
+
+  camera.defocus_angle = 0.0f;
+  camera.focus_dist = 10.0f;
+
+  camera_render(&camera, &world);
+}
+
 int main(void) {
-  int scene_to_render = 3;
+  int scene_to_render = 4;
 
   switch (scene_to_render) {
     case 1: bouncing_spheres();  break;
     case 2: checkered_spheres(); break;
     case 3: earth();             break;
+    case 4: perlin_spheres();    break;
     default:                     break;
   }
 }
