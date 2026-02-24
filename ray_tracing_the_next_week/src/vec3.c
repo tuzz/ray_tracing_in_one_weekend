@@ -101,6 +101,14 @@ static Vec3 vec3_lerp(Vec3 a, Vec3 b, float t) {
   return vec3_add(vec3_scale(a, 1.0f - t), vec3_scale(b, t));
 }
 
+static Vec3 vec3_min(Vec3 a, Vec3 b) {
+  return (Vec3){{fminf(a.coord.x, b.coord.x), fminf(a.coord.y, b.coord.y), fminf(a.coord.z, b.coord.z)}};
+}
+
+static Vec3 vec3_max(Vec3 a, Vec3 b) {
+  return (Vec3){{fmaxf(a.coord.x, b.coord.x), fmaxf(a.coord.y, b.coord.y), fmaxf(a.coord.z, b.coord.z)}};
+}
+
 static void vec3_write(Vec3 v, FILE *f) {
   fprintf(f, "%f %f %f", (double)v.coord.x, (double)v.coord.y, (double)v.coord.z);
 }

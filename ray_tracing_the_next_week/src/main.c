@@ -26,6 +26,7 @@
 #include "checker_texture.c"
 #include "hittable.c"
 #include "hittable_list.c"
+#include "box.c"
 #include "lambertian.c"
 #include "metal.c"
 #include "dielectric.c"
@@ -290,6 +291,12 @@ static void cornell_box(void) {
   hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{0.0f, 0.0f, 0.0f}}, (Vec3){{555.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, 555.0f}}, &white)});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{555.0f, 555.0f, 555.0f}}, (Vec3){{-555.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, -555.0f}}, &white)});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{0.0f, 0.0f, 555.0f}}, (Vec3){{555.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 555.0f, 0.0f}}, &white)});
+
+  HittableList front_box = box_new((Point3){{130.0f, 0.0f, 65.0f}}, (Point3){{295.0f, 165.0f, 230.0f}}, &white);
+  HittableList back_box = box_new((Point3){{265.0f, 0.0f, 295.0f}}, (Point3){{430.0f, 330.0f, 460.0f}}, &white);
+
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_LIST, .u.list = &front_box});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_LIST, .u.list = &back_box});
 
   Camera camera = {0};
   camera.aspect_ratio = 1.0f;
