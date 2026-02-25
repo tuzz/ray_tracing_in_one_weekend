@@ -11,12 +11,17 @@ typedef struct Translate Translate;
 static bool translate_hit(const Translate *t, const Ray3 *ray, Interval ray_t, Hit *hit);
 static AABB translate_bounding_box(const Translate *t);
 
+typedef struct RotateY RotateY;
+static bool rotate_y_hit(const RotateY *r, const Ray3 *ray, Interval ray_t, Hit *hit);
+static AABB rotate_y_bounding_box(const RotateY *t);
+
 typedef enum {
   HITTABLE_SPHERE,
   HITTABLE_QUAD,
   HITTABLE_LIST,
   HITTABLE_BVH_NODE,
   HITTABLE_TRANSLATE,
+  HITTABLE_ROTATE_Y,
 } HittableType;
 
 typedef struct Hittable {
@@ -27,6 +32,7 @@ typedef struct Hittable {
     HittableList *list;
     BVHNode *node;
     Translate *translate;
+    RotateY *rotate_y;
   } u;
 } Hittable;
 
@@ -42,6 +48,8 @@ static bool hittable_hit(const Hittable *h, const Ray3 *ray, Interval ray_t, Hit
       return bvh_node_hit(h->u.node, ray, ray_t, hit);
     case HITTABLE_TRANSLATE:
       return translate_hit(h->u.translate, ray, ray_t, hit);
+    case HITTABLE_ROTATE_Y:
+      return rotate_y_hit(h->u.rotate_y, ray, ray_t, hit);
     default:
       assert(false && "Unknown HittableType");
   }
@@ -59,6 +67,8 @@ static AABB hittable_bounding_box(const Hittable *h) {
       return bvh_node_bounding_box(h->u.node);
     case HITTABLE_TRANSLATE:
       return translate_bounding_box(h->u.translate);
+    case HITTABLE_ROTATE_Y:
+      return rotate_y_bounding_box(h->u.rotate_y);
     default:
       assert(false && "Unknown HittableType");
   }

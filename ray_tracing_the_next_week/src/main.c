@@ -26,6 +26,7 @@
 #include "checker_texture.c"
 #include "hittable.c"
 #include "translate.c"
+#include "rotate_y.c"
 #include "hittable_list.c"
 #include "box.c"
 #include "lambertian.c"
@@ -295,12 +296,16 @@ static void cornell_box(void) {
 
   HittableList list1 = box_new((Point3){{0.0f, 0.0f, 0.0f}}, (Point3){{165.0f, 330.0f, 165.0f}}, &white);
   Hittable hittable1 = {.type = HITTABLE_LIST, .u.list = &list1};
-  Translate translate1 = translate_new(&hittable1, (Vec3){{265.0f, 0.0f, 295.0f}});
+  RotateY rotate1 = rotate_y_new(&hittable1, 15.0f);
+  Hittable hittable1_ = {.type = HITTABLE_ROTATE_Y, .u.rotate_y = &rotate1};
+  Translate translate1 = translate_new(&hittable1_, (Vec3){{265.0f, 0.0f, 295.0f}});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_TRANSLATE, .u.translate = &translate1});
 
   HittableList list2 = box_new((Point3){{0.0f, 0.0f, 0.0f}}, (Point3){{165.0f, 165.0f, 165.0f}}, &white);
   Hittable hittable2 = {.type = HITTABLE_LIST, .u.list = &list2};
-  Translate translate2 = translate_new(&hittable2, (Vec3){{130.0f, 0.0f, 65.0f}});
+  RotateY rotate2 = rotate_y_new(&hittable2, -18.0f);
+  Hittable hittable2_ = {.type = HITTABLE_ROTATE_Y, .u.rotate_y = &rotate2};
+  Translate translate2 = translate_new(&hittable2_, (Vec3){{130.0f, 0.0f, 65.0f}});
   hittable_list_add(&list, (Hittable){.type = HITTABLE_TRANSLATE, .u.translate = &translate2});
 
   Camera camera = {0};
