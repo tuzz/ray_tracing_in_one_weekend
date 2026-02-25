@@ -60,3 +60,11 @@ static int aabb_longest_axis(const AABB *aabb) {
     return y_size > z_size ? 1 : 2;
   }
 }
+
+static AABB aabb_add_vec3(const AABB *aabb, Vec3 vec) {
+  return (AABB){{
+    interval_add(aabb->interval.x, vec.coord.x),
+    interval_add(aabb->interval.y, vec.coord.y),
+    interval_add(aabb->interval.z, vec.coord.z),
+  }};
+}

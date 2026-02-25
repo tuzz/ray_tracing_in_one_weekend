@@ -22,6 +22,10 @@ static Interval interval_union(Interval a, Interval b) {
   };
 }
 
+static Interval interval_add(Interval i, float displacement) {
+  return (Interval){i.min + displacement, i.max + displacement};
+}
+
 static float interval_size(Interval i) {
   return i.max - i.min;
 }
