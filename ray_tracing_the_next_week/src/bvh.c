@@ -1,4 +1,4 @@
-#define MAX_BVH_NODES 1000
+#define MAX_BVH_NODES 2000
 
 struct BVHNode {
   Hittable *left;

@@ -151,7 +151,7 @@ static void checkered_spheres(void) {
 
 static void earth(void) {
   Image image = image_load("images/earthmap.jpg");
-  Texture texture = {.type = TEXTURE_IMAGE, .u.image_texture = {.image = &image}};
+  Texture texture = {.type = TEXTURE_IMAGE, .u.image_texture.image = &image};
   Material surface = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &texture};
   Hittable globe = {.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 0.0f, 0.0f}}}, 2.0f, &surface)};
 
@@ -389,18 +389,130 @@ static void cornell_smoke(void) {
   camera_render(&camera, &world);
 }
 
+static void final_scene(int image_width, int samples_per_pixel, int max_depth) {
+  HittableList boxes1 = hittable_list_new();
+  Texture green = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.48f, 0.83f, 0.53f}}};
+  Material ground = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &green};
+
+  int boxes_per_side = 20;
+  HittableList *boxes = calloc(boxes_per_side * boxes_per_side, sizeof(HittableList));
+  for (int i = 0; i < boxes_per_side; i++) {
+    for (int j = 0; j < boxes_per_side; j++) {
+      float w = 100.0f;
+      float x0 = -1000.0f + i * w;
+      float z0 = -1000.0f + j * w;
+      float y0 = 0.0f;
+      float x1 = x0 + w;
+      float y1 = random_between(1.0f, 101.0f);
+      float z1 = z0 + w;
+
+      boxes[i * boxes_per_side + j] = box_new((Point3){{x0, y0, z0}}, (Point3){{x1, y1, z1}}, &ground);
+      hittable_list_add(&boxes1, (Hittable){.type = HITTABLE_LIST, .u.list = &boxes[i * boxes_per_side + j]});
+    }
+  }
+
+  HittableList list = hittable_list_new();
+  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
+
+  BVH bvh = {0};
+  hittable_list_add(&list, *bvh_node(&bvh, boxes1.items, 0, boxes1.length));
+
+  Texture light_tex = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{7.0f, 7.0f, 7.0f}}};
+  Material light = {.type = MATERIAL_DIFFUSE_LIGHT, .u.diffuse_light.tex = &light_tex};
+  Quad quad = quad_new((Point3){{123.0f, 554.0f, 147.0f}}, (Vec3){{300.0f, 0.0f, 0.0f}}, (Vec3){{0.0f ,0.0f, 265.0f}}, &light);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad});
+
+  Texture sphere_texture = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.7f, 0.3f, 0.1f}}};
+  Material sphere_material = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &sphere_texture};
+  Sphere moving_sphere = sphere_new((Ray3){.origin = {{400.0f, 400.0f, 200.0f}}, .direction = {{30.0f, 0.0f, 0.0f}}}, 50.0f, &sphere_material);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = moving_sphere});
+
+  Material glass = (Material){.type = MATERIAL_DIELECTRIC, .u.dielectric.refaction_index = 1.5f};
+  Sphere glass_sphere = sphere_new((Ray3){.origin = {{260.0f, 150.0f, 45.0f}}}, 50.0f, &glass);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = glass_sphere});
+
+  Material metal = (Material){.type = MATERIAL_METAL, .u.metal = {.albedo = {{0.8f, 0.8f, 0.9f}}, .fuzz = 1.0f}};
+  Sphere metal_sphere = sphere_new((Ray3){.origin = {{0.0f, 150.0f, 145.0f}}}, 50.0f, &metal);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = metal_sphere});
+
+  // The glassy outside of the blue sphere.
+  Hittable boundary = {.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{360.0f, 150.0f, 145.0f}}}, 70.0f, &glass)};
+  hittable_list_add(&list, boundary);
+
+  // The inner blue smoke of the blue sphere (subsurface scattering).
+  Texture blue = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.2f, 0.4f, 0.9f}}};
+  Material isotropic = {.type = MATERIAL_ISOTROPIC, .u.isotropic.tex = &blue};
+  ConstantMedium medium = constant_medium_new(&boundary, 0.2f, &isotropic);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_CONSTANT_MEDIUM, .u.constant_medium = &medium});
+
+  // Slight fog throughout the scene.
+  Hittable boundary2 = {.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{0.0f, 0.0f, 0.0f}}}, 5000.0f, &glass)};
+  Texture white = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = WHITE};
+  Material isotropic2 = {.type = MATERIAL_ISOTROPIC, .u.isotropic.tex = &white};
+  ConstantMedium medium2 = constant_medium_new(&boundary2, 0.0001f, &isotropic2);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_CONSTANT_MEDIUM, .u.constant_medium = &medium2});
+
+  Image image = image_load("images/earthmap.jpg");
+  Texture image_texture = {.type = TEXTURE_IMAGE, .u.image_texture.image = &image};
+  Material lambertian = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &image_texture};
+  Sphere earth_sphere = sphere_new((Ray3){.origin = {{400.0f, 200.0f, 400.0f}}}, 100.0f, &lambertian);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = earth_sphere});
+
+  Texture pertext = {.type = TEXTURE_NOISE, .u.noise_texture = {.perlin = perlin_generate(), .scale = 0.2f}};
+  Material permat = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &pertext};
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = {{220.0f, 280.0f, 300.0f}}}, 80.0f, &permat)});
+
+  // Add 1000 spheres insides box to form a cloud.
+  HittableList boxes2 = hittable_list_new();
+  Texture cloud_white = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.73f, 0.73f, 0.73f}}};
+  Material cloud_mat = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &cloud_white};
+  int ns = 1000;
+  for (int j = 0; j < ns; j++) {
+    Hittable cloud = {.type = HITTABLE_SPHERE, .u.sphere = sphere_new((Ray3){.origin = vec3_random_between(0.0f, 165.0f)}, 10.0f, &cloud_mat)};
+    hittable_list_add(&boxes2, cloud);
+  }
+
+  // Position the cloud in the scene.
+  BVH bvh2 = {0};
+  Hittable root = *bvh_node(&bvh2, boxes2.items, 0, boxes2.length);
+  RotateY rotate = rotate_y_new(&root, 15.0f);
+  Hittable hittable = {.type = HITTABLE_ROTATE_Y, .u.rotate_y = &rotate};
+  Translate translate = translate_new(&hittable, (Vec3){{-100.0f, 270.0f, 395.0f}});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_TRANSLATE, .u.translate = &translate});
+
+  Camera camera = {0};
+  camera.aspect_ratio = 1.0f;
+  camera.image_width = image_width;
+  camera.samples_per_pixel = samples_per_pixel;
+  camera.max_depth = max_depth;
+  camera.background = BLACK;
+
+  camera.vfov = 40.0f;
+  camera.lookfrom = (Point3){{478.0f, 278.0f, -600.0f}};
+  camera.lookat = (Point3){{278.0f, 278.0f, 0.0f}};
+  camera.vup = (Point3){{0.0f, 1.0f, 0.0f}};
+
+  camera.defocus_angle = 0.0f;
+  camera.focus_dist = 10.0f;
+
+  camera_render(&camera, &world);
+  image_free(&image);
+  free(boxes);
+}
+
 int main(void) {
-  int scene_to_render = 8;
+  int scene_to_render = 9;
 
   switch (scene_to_render) {
-    case 1: bouncing_spheres();  break;
-    case 2: checkered_spheres(); break;
-    case 3: earth();             break;
-    case 4: perlin_spheres();    break;
-    case 5: quads();             break;
-    case 6: simple_light();      break;
-    case 7: cornell_box();       break;
-    case 8: cornell_smoke();     break;
-    default:                     break;
+    case 1:  bouncing_spheres();          break;
+    case 2:  checkered_spheres();         break;
+    case 3:  earth();                     break;
+    case 4:  perlin_spheres();            break;
+    case 5:  quads();                     break;
+    case 6:  simple_light();              break;
+    case 7:  cornell_box();               break;
+    case 8:  cornell_smoke();             break;
+    case 9:  final_scene(800, 10000, 40); break;
+    default: final_scene(400, 250, 4);    break;
   }
 }
