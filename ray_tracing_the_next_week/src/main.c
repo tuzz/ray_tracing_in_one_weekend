@@ -27,12 +27,14 @@
 #include "hittable.c"
 #include "translate.c"
 #include "rotate_y.c"
+#include "constant_medium.c"
 #include "hittable_list.c"
 #include "box.c"
 #include "lambertian.c"
 #include "metal.c"
 #include "dielectric.c"
 #include "diffuse_light.c"
+#include "isotropic.c"
 #include "material.c"
 #include "camera.c"
 #include "bvh.c"
@@ -326,8 +328,69 @@ static void cornell_box(void) {
   camera_render(&camera, &world);
 }
 
+static void cornell_smoke(void) {
+  HittableList list = hittable_list_new();
+  Hittable world = {.type = HITTABLE_LIST, .u.list = &list};
+
+  Texture red_tex = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.65f, 0.05f, 0.05f}}};
+  Texture white_tex = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.73f, 0.73f, 0.73f}}};
+  Texture green_tex = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{0.12f, 0.45f, 0.15f}}};
+  Texture light_tex = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = {{7.0f, 7.0f, 7.0f}}};
+
+  Material red = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &red_tex};
+  Material white = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &white_tex};
+  Material green = {.type = MATERIAL_LAMBERTIAN, .u.lambertian.tex = &green_tex};
+  Material light = {.type = MATERIAL_DIFFUSE_LIGHT, .u.diffuse_light.tex = &light_tex};
+
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{555.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 555.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, 555.0f}}, &green)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{0.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 555.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, 555.0f}}, &red)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{113.0f, 554.0f, 127.0f}}, (Vec3){{330.0f, 0.0f, 0.0f}}, (Vec3){{0.0f ,0.0f, 305.0f}}, &light)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{0.0f, 0.0f, 0.0f}}, (Vec3){{555.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, 555.0f}}, &white)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{555.0f, 555.0f, 555.0f}}, (Vec3){{-555.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 0.0f, -555.0f}}, &white)});
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_QUAD, .u.quad = quad_new((Point3){{0.0f, 0.0f, 555.0f}}, (Vec3){{555.0f, 0.0f, 0.0f}}, (Vec3){{0.0f, 555.0f, 0.0f}}, &white)});
+
+  HittableList list1 = box_new((Point3){{0.0f, 0.0f, 0.0f}}, (Point3){{165.0f, 330.0f, 165.0f}}, &white);
+  Hittable hittable1 = {.type = HITTABLE_LIST, .u.list = &list1};
+  RotateY rotate1 = rotate_y_new(&hittable1, 15.0f);
+  Hittable hittable1_ = {.type = HITTABLE_ROTATE_Y, .u.rotate_y = &rotate1};
+  Translate translate1 = translate_new(&hittable1_, (Vec3){{265.0f, 0.0f, 295.0f}});
+  Hittable hittable1__ = {.type = HITTABLE_TRANSLATE, .u.translate = &translate1};
+  Texture solid_color1 = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = BLACK};
+  Material isotropic1 = (Material){.type = MATERIAL_ISOTROPIC, .u.isotropic.tex = &solid_color1};
+  ConstantMedium medium1 = constant_medium_new(&hittable1__, 0.01f, &isotropic1);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_CONSTANT_MEDIUM, .u.constant_medium = &medium1});
+
+  HittableList list2 = box_new((Point3){{0.0f, 0.0f, 0.0f}}, (Point3){{165.0f, 165.0f, 165.0f}}, &white);
+  Hittable hittable2 = {.type = HITTABLE_LIST, .u.list = &list2};
+  RotateY rotate2 = rotate_y_new(&hittable2, -18.0f);
+  Hittable hittable2_ = {.type = HITTABLE_ROTATE_Y, .u.rotate_y = &rotate2};
+  Translate translate2 = translate_new(&hittable2_, (Vec3){{130.0f, 0.0f, 65.0f}});
+  Hittable hittable2__ = {.type = HITTABLE_TRANSLATE, .u.translate = &translate2};
+  Texture solid_color2 = {.type = TEXTURE_SOLID_COLOR, .u.solid_color.albedo = WHITE};
+  Material isotropic2 = (Material){.type = MATERIAL_ISOTROPIC, .u.isotropic.tex = &solid_color2};
+  ConstantMedium medium2 = constant_medium_new(&hittable2__, 0.01f, &isotropic2);
+  hittable_list_add(&list, (Hittable){.type = HITTABLE_CONSTANT_MEDIUM, .u.constant_medium = &medium2});
+
+  Camera camera = {0};
+  camera.aspect_ratio = 1.0f;
+  camera.image_width = 1000;
+  camera.samples_per_pixel = 500;
+  camera.max_depth = 50;
+  camera.background = BLACK;
+
+  camera.vfov = 40.0f;
+  camera.lookfrom = (Point3){{278.0f, 278.0f, -800.0f}};
+  camera.lookat = (Point3){{278.0f, 278.0f, 0.0f}};
+  camera.vup = (Point3){{0.0f, 1.0f, 0.0f}};
+
+  camera.defocus_angle = 0.0f;
+  camera.focus_dist = 10.0f;
+
+  camera_render(&camera, &world);
+}
+
 int main(void) {
-  int scene_to_render = 7;
+  int scene_to_render = 8;
 
   switch (scene_to_render) {
     case 1: bouncing_spheres();  break;
@@ -337,6 +400,7 @@ int main(void) {
     case 5: quads();             break;
     case 6: simple_light();      break;
     case 7: cornell_box();       break;
+    case 8: cornell_smoke();     break;
     default:                     break;
   }
 }
